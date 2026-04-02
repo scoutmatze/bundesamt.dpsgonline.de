@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── NextAuth Models ───
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Application Models ───
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  firstName     String?
+  lastName      String?
+  street        String?
+  zipCode       String?
+  city          String?
+  ibanEncrypted String?   @db.Text // AES-256-GCM encrypted
+  bic           String?
+  bank          String?
+  accountHolder String?
+  signaturePath String?   // Path in MinIO
+  kmRate        Float     @default(0.20)
+  image         String?   // NextAuth default
+
+  accounts Account[]
+  sessions Session[]
+  trips    Trip[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Trip {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  purpose      String
+  route        String?
+  startDate    DateTime
+  startTime    String?
+  endDate      DateTime?
+  endTime      String?
+  travelMode   TravelMode @default(BAHN)
+  pkwReason    String?
+  licensePlate String?
+  co2Offset    Boolean    @default(false)
+
+  status       TripStatus @default(DRAFT)
+  submittedAt  DateTime?
+  pdfPath      String?    // Generated PDF in MinIO
+
+  receipts Receipt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, startDate])
+}
+
+model Receipt {
+  id            String          @id @default(cuid())
+  tripId        String
+  trip          Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  description   String?
+  amount        Float
+  date          DateTime
+  category      ReceiptCategory
+  fromStation   String?
+  toStation     String?
+  isHandyticket Boolean         @default(false)
+
+  fileName      String?
+  filePath      String?         // Path in MinIO
+  mimeType      String?
+  fileSize      Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([tripId])
+}
+
+enum TravelMode {
+  BAHN
+  PRIVAT_PKW
+  DIENSTWAGEN
+  FLUGZEUG
+  FAHRRAD
+  MIETWAGEN
+}
+
+enum TripStatus {
+  DRAFT
+  READY
+  SUBMITTED
+  ARCHIVED
+}
+
+enum ReceiptCategory {
+  FAHRT
+  UNTERKUNFT
+  VERPFLEGUNG
+  NEBENKOSTEN
+}

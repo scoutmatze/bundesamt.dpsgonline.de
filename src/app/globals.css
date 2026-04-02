@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --dpsg-red: #8B1A2B;
+  --dpsg-red-light: #A62E42;
+  --dpsg-gold: #C4943D;
+  --dpsg-gold-light: #D4A843;
+  --warm-white: #FAF9F6;
+}
+
+body {
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  background: var(--warm-white);
+  color: #2A2826;
+}
+
+h1, h2, h3 {
+  font-family: "Source Serif 4", Georgia, serif;
+}
