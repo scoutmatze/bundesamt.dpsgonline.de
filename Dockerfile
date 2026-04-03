@@ -31,6 +31,10 @@ COPY --from=builder /app/public ./public
 # Copy PDF generator
 COPY pdf-generator ./pdf-generator
 
+# Copy email poller scripts
+COPY scripts ./scripts
+RUN cd scripts && npm install --omit=dev 2>/dev/null || true
+
 # Copy Prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma

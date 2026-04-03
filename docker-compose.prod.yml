@@ -39,6 +39,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=${SMTP_FROM}
       - PDF_GENERATOR_PATH=/app/pdf-generator
+    volumes:
+      - uploads:/app/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`bundesamt.dpsgonline.de`)"
@@ -71,6 +73,7 @@ services:
       - internal
 
 volumes:
+  uploads:
   pgdata:
   traefik_certs:
 

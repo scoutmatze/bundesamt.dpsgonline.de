@@ -10,45 +10,42 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const res = await fetch("/api/auth/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ email }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       router.push(data.needsProfile ? "/profil" : "/reisen");
-    } catch (e: any) {
-      setError(e.message || "Login fehlgeschlagen");
-    } finally {
-      setLoading(false);
-    }
+    } catch (e: any) { setError(e.message || "Login fehlgeschlagen"); }
+    finally { setLoading(false); }
   };
 
   return (
-    <main style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#FAF9F6" }}>
-      <div style={{ width:"100%", maxWidth:400, padding:"40px 32px", background:"#fff", borderRadius:16, border:"1px solid #EDECEA", boxShadow:"0 2px 12px rgba(0,0,0,0.04)" }}>
-        <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ fontSize:36, marginBottom:8 }}>🏕️</div>
-          <h1 style={{ fontSize:22, fontWeight:700, color:"#8B1A2B", margin:"0 0 4px", fontFamily:"'Source Serif 4',Georgia,serif" }}>DPSG Reisekosten</h1>
-          <p style={{ fontSize:14, color:"#6B6862", margin:0 }}>Anmelden mit deiner E-Mail</p>
+    <main style={{ minHeight:"100vh", display:"flex", flexDirection:"column" }}>
+      <div style={{ background:"#003056", padding:"24px", position:"relative" }}>
+        <div style={{ maxWidth:400, margin:"0 auto" }}>
+          <span style={{ color:"#fff", fontWeight:700, fontSize:18 }}>DPSG Reisekosten</span>
         </div>
-        <form onSubmit={handleLogin}>
-          <label style={{ display:"block", fontSize:13, fontWeight:600, color:"#6B6862", marginBottom:6 }}>E-Mail-Adresse</label>
-          <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="vorname.nachname@dpsg.de"
-            style={{ width:"100%", padding:"12px 14px", border:"1.5px solid #D8D6D2", borderRadius:8, fontSize:15, outline:"none", boxSizing:"border-box", marginBottom:16 }}/>
-          {error && <p style={{ color:"#DC2626", fontSize:13, margin:"0 0 12px" }}>{error}</p>}
-          <button type="submit" disabled={loading}
-            style={{ width:"100%", padding:"12px", border:"none", borderRadius:8, background:"#8B1A2B", color:"#fff", fontSize:15, fontWeight:600, cursor:loading?"wait":"pointer", opacity:loading?0.7:1 }}>
-            {loading ? "..." : "Anmelden"}
-          </button>
-        </form>
-        <p style={{ fontSize:12, color:"#B8B5AF", textAlign:"center", marginTop:20 }}>
-          Kein Passwort nötig. Neue Nutzer werden automatisch registriert.
-        </p>
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:4, background:"#8b0a1e" }} />
+      </div>
+      <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px" }}>
+        <div style={{ width:"100%", maxWidth:400, background:"#fff", borderRadius:12, border:"1px solid #d4d0c8", padding:"32px 28px" }}>
+          <h1 style={{ fontSize:22, fontWeight:700, color:"#003056", margin:"0 0 4px" }}>Anmelden</h1>
+          <p style={{ fontSize:14, color:"#7a756c", margin:"0 0 24px" }}>Mit deiner E-Mail-Adresse</p>
+          <form onSubmit={handleLogin}>
+            <label style={{ display:"block", fontSize:12, fontWeight:600, color:"#5c5850", marginBottom:6, textTransform:"uppercase", letterSpacing:0.8 }}>E-Mail-Adresse</label>
+            <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="vorname.nachname@dpsg.de"
+              style={{ width:"100%", padding:"10px 14px", border:"1.5px solid #d4d0c8", borderRadius:8, fontSize:14, outline:"none", boxSizing:"border-box", marginBottom:16 }} />
+            {error && <p style={{ color:"#8b0a1e", fontSize:13, margin:"0 0 12px" }}>{error}</p>}
+            <button type="submit" disabled={loading}
+              style={{ width:"100%", padding:"12px", border:"none", borderRadius:8, background:"#003056", color:"#fff", fontSize:15, fontWeight:700, cursor:loading?"wait":"pointer", opacity:loading?0.7:1 }}>
+              {loading ? "..." : "Anmelden"}
+            </button>
+          </form>
+          <p style={{ fontSize:12, color:"#9e9a92", textAlign:"center", marginTop:20 }}>
+            Kein Passwort nötig. Neue Nutzer*innen werden automatisch registriert.
+          </p>
+        </div>
       </div>
     </main>
   );

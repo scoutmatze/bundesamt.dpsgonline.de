@@ -133,3 +133,8 @@ if __name__ == "__main__":
         print(f"Usage: {sys.argv[0]} <input.json> <output.pdf>"); sys.exit(1)
     with open(sys.argv[1]) as f: data = json.load(f)
     generate(data, sys.argv[2])
+
+# Note: signature processing (background removal, trimming)
+# is done by process_signature.py before PDF generation.
+# The API endpoint should call process_signature.py first,
+# then pass the processed path to generate_reisekosten.py.

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
 import { execSync } from "child_process";
-import { readFileSync, writeFileSync, unlinkSync } from "fs";
+import { readFileSync, writeFileSync, unlinkSync, existsSync } from "fs";
 import { randomBytes } from "crypto";
 import path from "path";
 
@@ -35,9 +35,23 @@ export async function GET(req: NextRequest) {
   const receipts = trip.receipts;
   const byC = (c: string) => receipts.filter(r => r.category === c).reduce((s, r) => s + r.amount, 0);
   const total = receipts.reduce((s, r) => s + r.amount, 0);
-
   const fmt = (n: number) => n.toFixed(2).replace(".", ",");
   const fmtDate = (d: Date) => d.toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+  const tmpId = randomBytes(8).toString("hex");
+  const genPath = process.env.PDF_GENERATOR_PATH || path.join(process.cwd(), "pdf-generator");
+
+  // Process signature if exists
+  let processedSigPath: string | null = null;
+  if (user.signaturePath && existsSync(user.signaturePath)) {
+    processedSigPath = `/tmp/sig_processed_${tmpId}.png`;
+    try {
+      execSync(`python3 ${genPath}/process_signature.py "${user.signaturePath}" "${processedSigPath}"`, { timeout: 10000 });
+    } catch (e) {
+      console.error("Signature processing failed, using original");
+      processedSigPath = user.signaturePath;
+    }
+  }
 
   const input = {
     profile: {
@@ -46,11 +60,11 @@ export async function GET(req: NextRequest) {
       street: user.street || "",
       zip: user.zipCode || "",
       city: user.city || "",
-      accountHolder: user.accountHolder || `${user.firstName} ${user.lastName}`,
+      accountHolder: user.accountHolder || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
       bank: user.bank || "",
       iban: user.ibanEncrypted || "",
       bic: user.bic || "",
-      signaturePath: user.signaturePath || null,
+      signaturePath: processedSigPath,
     },
     trip: {
       purpose: trip.purpose,
@@ -62,7 +76,7 @@ export async function GET(req: NextRequest) {
       mode: trip.travelMode,
       pkwReason: trip.pkwReason || "",
       licensePlate: trip.licensePlate || "",
-      km: trip.travelMode === "PRIVAT_PKW" && byC("FAHRT") > 0 ? Math.round(byC("FAHRT") / 0.20) : 0,
+      km: trip.travelMode === "PRIVAT_PKW" ? Math.round(byC("FAHRT") / 0.20) : 0,
     },
     costs: {
       travel: fmt(byC("FAHRT")),
@@ -85,18 +99,12 @@ export async function GET(req: NextRequest) {
     },
   };
 
-  const tmpId = randomBytes(8).toString("hex");
   const inputPath = `/tmp/pdf_input_${tmpId}.json`;
   const outputPath = `/tmp/pdf_output_${tmpId}.pdf`;
 
   try {
     writeFileSync(inputPath, JSON.stringify(input));
-
-    const genPath = process.env.PDF_GENERATOR_PATH || path.join(process.cwd(), "pdf-generator");
-    execSync(`python3 ${genPath}/generate_reisekosten.py ${inputPath} ${outputPath}`, {
-      timeout: 30000,
-    });
-
+    execSync(`python3 ${genPath}/generate_reisekosten.py ${inputPath} ${outputPath}`, { timeout: 30000 });
     const pdf = readFileSync(outputPath);
 
     return new NextResponse(pdf, {
@@ -111,5 +119,6 @@ export async function GET(req: NextRequest) {
   } finally {
     try { unlinkSync(inputPath); } catch {}
     try { unlinkSync(outputPath); } catch {}
+    if (processedSigPath?.startsWith("/tmp/")) try { unlinkSync(processedSigPath); } catch {}
   }
 }
