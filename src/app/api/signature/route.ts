@@ -1,0 +1,9 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
+import path from "path";
+async function getUser(){const c=await cookies();const t=c.get("dpsg-session")?.value;if(!t)return null;const s=await prisma.session.findUnique({where:{sessionToken:t},include:{user:true}});if(!s||s.expires<new Date())return null;return s.user;}
+export async function POST(req:NextRequest){const u=await getUser();if(!u)return NextResponse.json({error:"Unauthorized"},{status:401});const fd=await req.formData();const f=fd.get("signature") as File|null;if(!f)return NextResponse.json({error:"No file"},{status:400});if(!["image/png","image/jpeg","image/webp"].includes(f.type))return NextResponse.json({error:"PNG/JPG/WebP"},{status:400});const d="/app/uploads/signatures";if(!existsSync(d))mkdirSync(d,{recursive:true});const e=f.type==="image/png"?".png":f.type==="image/webp"?".webp":".jpg";const p=path.join(d,u.id+e);writeFileSync(p,Buffer.from(await f.arrayBuffer()));await prisma.user.update({where:{id:u.id},data:{signaturePath:p}});return NextResponse.json({ok:true});}
+export async function GET(){const u=await getUser();if(!u)return NextResponse.json({error:"Unauthorized"},{status:401});if(!u.signaturePath||!existsSync(u.signaturePath))return NextResponse.json({error:"No signature"},{status:404});const d=readFileSync(u.signaturePath);const e=path.extname(u.signaturePath).toLowerCase();const m=e===".png"?"image/png":e===".webp"?"image/webp":"image/jpeg";return new NextResponse(d,{headers:{"Content-Type":m}});}
+export async function DELETE(){const u=await getUser();if(!u)return NextResponse.json({error:"Unauthorized"},{status:401});await prisma.user.update({where:{id:u.id},data:{signaturePath:null}});return NextResponse.json({ok:true});}
