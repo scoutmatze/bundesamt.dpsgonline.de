@@ -85,4 +85,4 @@ Proprietär — Bundesamt Sankt Georg e. V.
 
 ## Kontakt
 
-Mathias Müller — Digitale Infrastruktur DPSG
+Mathias Meyer — Digitale Infrastruktur DPSG

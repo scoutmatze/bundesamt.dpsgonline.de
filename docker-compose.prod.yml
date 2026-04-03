@@ -1,11 +1,13 @@
+# Production Docker Compose with Traefik reverse proxy + Let's Encrypt SSL
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
 services:
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.2
     command:
       - "--api.dashboard=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=dpsg-reisekosten_web"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -31,11 +33,11 @@ services:
       - NEXTAUTH_URL=https://bundesamt.dpsgonline.de
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USER=${SMTP_USER:-}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
-      - SMTP_FROM=${SMTP_FROM:-}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
       - PDF_GENERATOR_PATH=/app/pdf-generator
     labels:
       - "traefik.enable=true"
@@ -74,4 +76,6 @@ volumes:
 
 networks:
   web:
+    driver: bridge
   internal:
+    driver: bridge

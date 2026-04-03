@@ -26,7 +26,7 @@ RUN apk add --no-cache python3 py3-pip py3-numpy py3-pillow \
 # Copy built app
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY public ./public
+COPY --from=builder /app/public ./public
 
 # Copy PDF generator
 COPY pdf-generator ./pdf-generator

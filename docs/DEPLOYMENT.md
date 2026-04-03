@@ -1,39 +1,28 @@
 # Deployment
 
-## Hetzner Cloud Server
+Für die vollständige Schritt-für-Schritt-Anleitung siehe:
 
-### Server einrichten
+→ **[HETZNER-SETUP.md](HETZNER-SETUP.md)**
 
-```bash
-# Ubuntu 24.04 LTS
-apt update && apt upgrade -y
-apt install docker.io docker-compose-plugin -y
-
-# Firewall
-ufw allow 22/tcp
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw enable
-```
-
-### Deployment
+## Quick Reference
 
 ```bash
-# Repository klonen
-git clone https://github.com/[org]/dpsg-reisekosten.git
+# Server: Ersteinrichtung (als root)
+bash deploy/server-init.sh
+
+# App: Erstmaliges Deployment (als deploy)
+git clone https://github.com/DEIN-USER/dpsg-reisekosten.git
 cd dpsg-reisekosten
+cp .env.example .env && nano .env
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
 
-# Environment einrichten
-cp .env.example .env
-nano .env  # → Produktionswerte eintragen
+# App: Update-Deployment (als deploy)
+bash deploy/deploy.sh
 
-# Starten
-docker compose -f docker-compose.yml up -d
+# Backup manuell
+bash deploy/backup.sh
 
-# Datenbank migrieren
-docker compose exec app npx prisma migrate deploy
+# Logs
+docker compose -f docker-compose.prod.yml logs -f app
 ```
-
-### SSL mit Traefik
-
-Siehe `docker/docker-compose.prod.yml` für die Produktion mit Traefik und Let's Encrypt.

@@ -34,12 +34,12 @@ apt install fonts-dejavu-core libreoffice-writer
 ```json
 {
   "profile": {
-    "lastName": "Müller",
+    "lastName": "Meyer",
     "firstName": "Mathias",
     "street": "Musterstraße 42",
     "zip": "80333",
     "city": "München",
-    "accountHolder": "Mathias Müller",
+    "accountHolder": "Mathias Meyer",
     "bank": "Commerzbank",
     "iban": "DE89 3704 0044 0532 0130 00",
     "bic": "COBADEFFXXX",
@@ -131,7 +131,7 @@ Beträge werden als String mit Komma übergeben: `"89,60"` (deutsches Format).
 
 ```json
 {
-  "name": "Mathias Müller",
+  "name": "Mathias Meyer",
   "date": "02.04.2026",
   "signaturePath": "/signatures/user123.png",
   "tickets": [
