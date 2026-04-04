@@ -59,7 +59,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
     const res=await fetch(`/api/pdf?tripId=${id}`);
     if(!res.ok){alert("Fehler: "+(await res.json()).error);return}
     const blob=await res.blob();const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");a.href=url;a.download=`Reisekostenabrechnung.pdf`;a.click();URL.revokeObjectURL(url);
+    const cd=res.headers.get("content-disposition")||"";const fn=cd.match(/filename="(.+)"/)?.[1]||"Abrechnung.pdf";const a=document.createElement("a");a.href=url;a.download=decodeURIComponent(fn);a.click();URL.revokeObjectURL(url);
   };
 
   const fmt=(n:number)=>n.toFixed(2).replace(".",",")+"\u00a0€";
@@ -85,7 +85,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={delTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Löschen</button>
-          <button onClick={downloadPdf} disabled={!receipts.length||hasIncomplete} style={{padding:"8px 16px",borderRadius:8,border:"none",background:hasIncomplete?"#d4d0c8":"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:hasIncomplete?"not-allowed":"pointer"}}>📄 PDF erstellen</button>
+          <button onClick={downloadPdf} disabled={!receipts.length||hasIncomplete} style={{padding:"8px 16px",borderRadius:8,border:"none",background:hasIncomplete?"#d4d0c8":"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:hasIncomplete?"not-allowed":"pointer"}}>📄 PDF-Paket erstellen</button>
         </div>
       </div>
 
