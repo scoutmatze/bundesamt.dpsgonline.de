@@ -3,12 +3,11 @@
 
 services:
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.2
     command:
       - "--api.dashboard=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=dpsg-reisekosten_web"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
