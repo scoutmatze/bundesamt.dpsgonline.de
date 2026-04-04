@@ -7,24 +7,56 @@ const S = {
   input: { width:"100%", padding:"9px 12px", border:"1.5px solid #d4d0c8", borderRadius:8, fontSize:14, outline:"none", boxSizing:"border-box" as const },
 };
 
+function Badge({ children, color }: { children: React.ReactNode; color: string }) {
+  const colors: Record<string, { bg: string; fg: string; border: string }> = {
+    blue: { bg:"#dbeafe", fg:"#1e40af", border:"#bfdbfe" },
+    amber: { bg:"#fef3c7", fg:"#92400e", border:"#fde68a" },
+    green: { bg:"#d1fae5", fg:"#065f46", border:"#a7f3d0" },
+  };
+  const c = colors[color] || colors.blue;
+  return <span style={{ display:"inline-flex", padding:"2px 8px", borderRadius:12, background:c.bg, color:c.fg, border:`1px solid ${c.border}`, fontSize:11, fontWeight:700 }}>{children}</span>;
+}
+
 export default function TripDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const [trip, setTrip] = useState<any>(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<string|null>(null);
   const [r, setR] = useState({ description:"", amount:"", date:"", category:"FAHRT", fromStation:"", toStation:"", isHandyticket:false });
+  const [editData, setEditData] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   const load = async () => { const res = await fetch("/api/trips"); const trips = await res.json(); setTrip(trips.find((t:any)=>t.id===id)||null); setLoading(false); };
   useEffect(() => { load(); }, [id]);
 
-  const addReceipt = async () => { await fetch("/api/receipts", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...r, tripId:id, amount:parseFloat(r.amount)}) }); setR({ description:"", amount:"", date:"", category:"FAHRT", fromStation:"", toStation:"", isHandyticket:false }); setAdding(false); load(); };
+  const addReceipt = async () => {
+    await fetch("/api/receipts", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...r, tripId:id, amount:parseFloat(r.amount)}) });
+    setR({ description:"", amount:"", date:"", category:"FAHRT", fromStation:"", toStation:"", isHandyticket:false }); setAdding(false); load();
+  };
+
+  const saveEdit = async (receiptId: string) => {
+    await fetch("/api/receipts", { method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ id: receiptId, ...editData }) });
+    setEditing(null); setEditData({}); load();
+  };
+
+  const startEdit = (rc: any) => {
+    setEditing(rc.id);
+    setEditData({ description: rc.description||"", amount: rc.amount, date: rc.date?.split("T")[0]||"", category: rc.category, fromStation: rc.fromStation||"", toStation: rc.toStation||"", isHandyticket: rc.isHandyticket });
+  };
+
   const delReceipt = async (rid:string) => { await fetch("/api/receipts", { method:"DELETE", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ id:rid, tripId:id }) }); load(); };
   const delTrip = async () => { if(!confirm("Reise wirklich löschen?"))return; await fetch("/api/trips", { method:"DELETE", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ id }) }); router.push("/reisen"); };
-  const downloadPdf = async () => { const res = await fetch(`/api/pdf?tripId=${id}`); if(!res.ok){alert("Fehler: "+(await res.json()).error);return;} const blob=await res.blob(); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`Reisekostenabrechnung.pdf`; a.click(); URL.revokeObjectURL(url); };
+  const downloadPdf = async () => {
+    const res = await fetch(`/api/pdf?tripId=${id}`);
+    if(!res.ok){ alert("Fehler: "+(await res.json()).error); return; }
+    const blob=await res.blob(); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=`Reisekostenabrechnung.pdf`; a.click(); URL.revokeObjectURL(url);
+  };
 
   const fmt = (n:number) => n.toFixed(2).replace(".",",") + " €";
   const up = (k:string,v:any) => setR(p=>({...p,[k]:v}));
+  const upEdit = (k:string,v:any) => setEditData((p:any)=>({...p,[k]:v}));
 
   if (loading) return <div style={{ padding:40, textAlign:"center", color:"#9e9a92" }}>Lade...</div>;
   if (!trip) return <div style={{ padding:40, textAlign:"center" }}>Reise nicht gefunden</div>;
@@ -32,22 +64,32 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const receipts = trip.receipts || [];
   const byC = (c:string) => receipts.filter((r:any)=>r.category===c).reduce((s:number,r:any)=>s+r.amount,0);
   const total = receipts.reduce((s:number,r:any)=>s+r.amount,0);
+  const hasIncomplete = receipts.some((r:any) => r.amount === 0);
+  const isEmail = (rc:any) => rc.description?.startsWith("Per E-Mail:");
 
   return (
     <div>
       <button onClick={()=>router.push("/reisen")} style={{ border:"none", background:"none", color:"#003056", fontSize:13, fontWeight:700, cursor:"pointer", padding:0 }}>← Zurück</button>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginTop:8, marginBottom:20, gap:12 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginTop:8, marginBottom:20, gap:12, flexWrap:"wrap" }}>
         <div>
           <h1 style={{ fontSize:24, fontWeight:700, color:"#003056", margin:0 }}>{trip.purpose}</h1>
           <p style={{ fontSize:14, color:"#7a756c", margin:"4px 0 0" }}>{trip.travelMode==="PRIVAT_PKW"?"🚗":"🚂"} {trip.route||"—"} · {new Date(trip.startDate).toLocaleDateString("de-DE")}</p>
         </div>
         <div style={{ display:"flex", gap:8 }}>
           <button onClick={delTrip} style={{ padding:"8px 16px", borderRadius:8, border:"1px solid #d4d0c8", background:"#fff", color:"#5c5850", fontSize:13, cursor:"pointer" }}>Löschen</button>
-          <button onClick={downloadPdf} disabled={!receipts.length} style={{ padding:"8px 16px", borderRadius:8, border:"none", background:"#003056", color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer", opacity:receipts.length?1:0.5 }}>📄 PDF erstellen</button>
+          <button onClick={downloadPdf} disabled={!receipts.length || hasIncomplete} title={hasIncomplete?"Alle Beträge müssen ausgefüllt sein":""} style={{ padding:"8px 16px", borderRadius:8, border:"none", background:hasIncomplete?"#d4d0c8":"#003056", color:"#fff", fontSize:13, fontWeight:700, cursor:hasIncomplete?"not-allowed":"pointer" }}>
+            📄 PDF erstellen
+          </button>
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10, marginBottom:20 }}>
+      {hasIncomplete && (
+        <div style={{ padding:"10px 16px", borderRadius:8, background:"#fef3c7", color:"#92400e", fontSize:13, fontWeight:600, marginBottom:16, border:"1px solid #fde68a" }}>
+          ⚠️ {receipts.filter((r:any)=>r.amount===0).length} Beleg(e) ohne Betrag — bitte ergänzen, um PDF zu erstellen.
+        </div>
+      )}
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))", gap:10, marginBottom:20 }}>
         {[{l:"Fahrt",v:byC("FAHRT")},{l:"Unterkunft",v:byC("UNTERKUNFT")},{l:"Verpflegung",v:byC("VERPFLEGUNG")},{l:"Nebenkosten",v:byC("NEBENKOSTEN")},{l:"Gesamt",v:total,a:true}].map((c,i)=>(
           <div key={i} style={{ background:c.a?"#003056":"#fff", borderRadius:10, padding:"12px 14px", border:c.a?"none":"1px solid #d4d0c8", color:c.a?"#fff":"#1a1815" }}>
             <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:0.6, fontWeight:600, opacity:0.6, marginBottom:4 }}>{c.l}</div>
@@ -58,15 +100,55 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
 
       <div style={{ background:"#fff", borderRadius:12, padding:24, border:"1px solid #d4d0c8" }}>
         <h3 style={{ fontSize:12, fontWeight:600, color:"#7a756c", textTransform:"uppercase", letterSpacing:1, marginTop:0, marginBottom:16 }}>Belege ({receipts.length})</h3>
-        {receipts.map((rc:any) => (
-          <div key={rc.id} style={{ display:"flex", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f5f3ef", gap:10 }}>
+
+        {receipts.map((rc:any) => editing === rc.id ? (
+          /* ── Edit Mode ── */
+          <div key={rc.id} style={{ background:"#f5f3ef", borderRadius:10, padding:"16px 18px", marginBottom:8 }}>
+            <div style={{ display:"grid", gap:10 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:10 }}>
+                <div><label style={S.label}>Beschreibung</label><input value={editData.description} onChange={e=>upEdit("description",e.target.value)} style={S.input}/></div>
+                <div><label style={S.label}>Kategorie</label><select value={editData.category} onChange={e=>upEdit("category",e.target.value)} style={{...S.input, background:"#fff"}}><option value="FAHRT">Fahrtkosten</option><option value="UNTERKUNFT">Unterkunft</option><option value="VERPFLEGUNG">Verpflegung</option><option value="NEBENKOSTEN">Nebenkosten</option></select></div>
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                <div><label style={S.label}>Betrag (€)</label><input type="number" step="0.01" value={editData.amount} onChange={e=>upEdit("amount",e.target.value)} style={{...S.input, borderColor: editData.amount==0?"#f59e0b":"#d4d0c8"}} autoFocus/></div>
+                <div><label style={S.label}>Datum</label><input type="date" value={editData.date} onChange={e=>upEdit("date",e.target.value)} style={S.input}/></div>
+              </div>
+              {editData.category==="FAHRT" && (
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                  <div><label style={S.label}>Von</label><input value={editData.fromStation} onChange={e=>upEdit("fromStation",e.target.value)} style={S.input}/></div>
+                  <div><label style={S.label}>Nach</label><input value={editData.toStation} onChange={e=>upEdit("toStation",e.target.value)} style={S.input}/></div>
+                </div>
+              )}
+              {editData.category==="FAHRT" && (
+                <label style={{ display:"flex", alignItems:"center", gap:8, fontSize:13, color:"#5c5850", cursor:"pointer" }}>
+                  <input type="checkbox" checked={editData.isHandyticket} onChange={e=>upEdit("isHandyticket",e.target.checked)} style={{ width:18, height:18, accentColor:"#003056" }}/>📱 Handyticket
+                </label>
+              )}
+            </div>
+            <div style={{ display:"flex", gap:8, marginTop:12, justifyContent:"flex-end" }}>
+              <button onClick={()=>setEditing(null)} style={{ padding:"8px 18px", borderRadius:8, border:"1px solid #d4d0c8", background:"#fff", color:"#5c5850", fontSize:13, cursor:"pointer" }}>Abbrechen</button>
+              <button onClick={()=>saveEdit(rc.id)} style={{ padding:"8px 18px", borderRadius:8, border:"none", background:"#003056", color:"#fff", fontSize:13, fontWeight:700, cursor:"pointer" }}>Speichern</button>
+            </div>
+          </div>
+        ) : (
+          /* ── Display Mode ── */
+          <div key={rc.id} style={{ display:"flex", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f5f3ef", gap:10, cursor:"pointer" }} onClick={()=>startEdit(rc)}>
             <span style={{ fontSize:18, width:28, textAlign:"center" }}>{rc.category==="FAHRT"?"🎫":rc.category==="UNTERKUNFT"?"🏨":rc.category==="VERPFLEGUNG"?"🍽":"📎"}</span>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:600, color:"#1a1815" }}>{rc.description||rc.category}</div>
-              <div style={{ fontSize:12, color:"#9e9a92" }}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}</div>
+              <div style={{ fontSize:14, fontWeight:600, color:"#1a1815", display:"flex", alignItems:"center", gap:6 }}>
+                {rc.description||rc.category}
+                {isEmail(rc) && <Badge color="blue">📩 E-Mail</Badge>}
+                {rc.amount === 0 && <Badge color="amber">⚠️ Betrag fehlt</Badge>}
+              </div>
+              <div style={{ fontSize:12, color:"#9e9a92" }}>
+                {new Date(rc.date).toLocaleDateString("de-DE")}
+                {rc.fromStation ? ` · ${rc.fromStation} → ${rc.toStation}` : ""}
+                {rc.isHandyticket ? " · 📱 HT" : ""}
+                {rc.fileName ? ` · 📎 ${rc.fileName}` : ""}
+              </div>
             </div>
-            <div style={{ fontWeight:700, fontSize:15, color:"#003056" }}>{fmt(rc.amount)}</div>
-            <button onClick={()=>delReceipt(rc.id)} style={{ border:"none", background:"none", color:"#9e9a92", cursor:"pointer", fontSize:16 }}>✕</button>
+            <div style={{ fontWeight:700, fontSize:15, color: rc.amount===0 ? "#f59e0b" : "#003056" }}>{rc.amount===0 ? "—" : fmt(rc.amount)}</div>
+            <button onClick={(e)=>{e.stopPropagation();delReceipt(rc.id)}} style={{ border:"none", background:"none", color:"#9e9a92", cursor:"pointer", fontSize:16 }}>✕</button>
           </div>
         ))}
 

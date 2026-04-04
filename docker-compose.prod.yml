@@ -3,12 +3,11 @@
 
 services:
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.2
     command:
       - "--api.dashboard=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=dpsg-reisekosten_web"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -40,13 +39,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=${SMTP_FROM}
       - PDF_GENERATOR_PATH=/app/pdf-generator
-      - IMAP_HOST=${IMAP_HOST}
-      - IMAP_PORT=${IMAP_PORT:-993}
-      - IMAP_USER=${IMAP_USER}
-      - IMAP_PASSWORD=${IMAP_PASSWORD}
-      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
-      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
-      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+    volumes:
+      - uploads:/app/uploads
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`bundesamt.dpsgonline.de`)"
@@ -79,6 +73,7 @@ services:
       - internal
 
 volumes:
+  uploads:
   pgdata:
   traefik_certs:
 
