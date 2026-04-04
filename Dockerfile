@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 # Install Python + PDF dependencies
 RUN apk add --no-cache python3 py3-pip py3-numpy py3-pillow \
     font-dejavu libreoffice-writer && \
-    pip3 install --break-system-packages pypdf reportlab python-docx
+    pip3 install --break-system-packages pypdf reportlab python-docx pdfplumber
 
 # Copy built app
 COPY --from=builder /app/.next/standalone ./

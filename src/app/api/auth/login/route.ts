@@ -5,8 +5,9 @@ import { randomBytes } from "crypto";
 
 export async function POST(req: NextRequest) {
   const { email } = await req.json();
-  if (!email || !email.includes("@")) {
-    return NextResponse.json({ error: "Gültige E-Mail erforderlich" }, { status: 400 });
+  const allowed = ["@dpsg.de", "@dpsgonline.de", "@bundesamt.dpsgonline.de"];
+  if (!email || !allowed.some(d => email.endsWith(d))) {
+    return NextResponse.json({ error: "Nur @dpsg.de E-Mail-Adressen erlaubt" }, { status: 400 });
   }
 
   let user = await prisma.user.findUnique({ where: { email } });
