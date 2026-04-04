@@ -17,16 +17,32 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const result = execSync("node /app/scripts/poll-emails.mjs", {
-      timeout: 60000,
-      env: process.env as any,
-    }).toString();
+    const result = execSync(
+      "cd /app/scripts && node poll-emails.mjs 2>&1 || true",
+      { timeout: 60000, env: process.env as any }
+    ).toString();
 
+    // Count processed
     const match = result.match(/Done: (\d+)/);
     const count = match ? parseInt(match[1]) : 0;
 
-    return NextResponse.json({ ok: true, processed: count, log: result });
+    // Count new receipts (from "✓" lines)
+    const newReceipts = (result.match(/✓/g) || []).length;
+
+    return NextResponse.json({
+      ok: true,
+      processed: count,
+      newReceipts,
+      message: count > 0
+        ? `${newReceipts} neue(r) Beleg(e) importiert`
+        : "Keine neuen Belege",
+    });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message, log: e.stdout?.toString() || "" }, { status: 500 });
+    const output = e.stdout?.toString() || e.message;
+    return NextResponse.json({
+      ok: false,
+      error: "Sync fehlgeschlagen",
+      message: output.includes("IMAP connected") ? "Keine neuen E-Mails" : output.substring(0, 200),
+    }, { status: 500 });
   }
 }

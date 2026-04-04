@@ -49,6 +49,7 @@ model VerificationToken {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  role          String    @default("USER")
   emailVerified DateTime?
   name          String?
   firstName     String?
@@ -145,4 +146,15 @@ enum ReceiptCategory {
   UNTERKUNFT
   VERPFLEGUNG
   NEBENKOSTEN
+}
+
+model LoginCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
 }
