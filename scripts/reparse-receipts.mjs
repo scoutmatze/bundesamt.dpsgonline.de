@@ -111,7 +111,6 @@ async function reparse() {
       values.push(val);
       paramIdx++;
     }
-    setClauses.push(`"updatedAt" = NOW()`);
     values.push(r.id);
 
     await pool.query(
