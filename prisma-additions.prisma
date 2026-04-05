@@ -1,0 +1,96 @@
+// ══════════════════════════════════════════════════════
+// Prisma Schema Ergänzungen
+// Diese Felder/Models in prisma/schema.prisma einfügen
+// ══════════════════════════════════════════════════════
+
+// ── Zum bestehenden User-Model hinzufügen: ──
+//   signatureData   String?       // Canvas-Signatur als Data URL
+
+// ── Zum bestehenden Trip-Model hinzufügen: ──
+//   startTime           String?
+//   endTime             String?
+//   verpflegungAmount   Float?     @default(0)
+//   verpflegungData     String?    // JSON
+//   kmRate              Float?     @default(0.30)
+//   kmLegs              String?    // JSON
+//   kmTotal             Int?       @default(0)
+//   kmAmount            Float?     @default(0)
+//   bewirtungen         Bewirtung[]
+
+// ── Neue Models: ──
+
+model Sachkosten {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year      Int
+  quarter   Int
+  status    String   @default("DRAFT")
+  notes     String?
+  items     SachkostenItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, year, quarter])
+}
+
+model SachkostenItem {
+  id            String     @id
+  sachkostenId  String
+  sachkosten    Sachkosten @relation(fields: [sachkostenId], references: [id], onDelete: Cascade)
+  date          DateTime
+  description   String
+  amount        Float      @default(0)
+  fileName      String?
+  filePath      String?
+  createdAt     DateTime   @default(now())
+}
+
+model Bewirtung {
+  id           String   @id
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tripId       String?
+  trip         Trip?    @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  date         DateTime
+  location     String
+  occasion     String
+  participants String   // JSON array
+  amountFood   Float    @default(0)
+  amountDrinks Float    @default(0)
+  amountTip    Float    @default(0)
+  amountTotal  Float    @default(0)
+  notes        String?
+  fileName     String?
+  filePath     String?
+  status       String   @default("DRAFT")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BahnCard {
+  id            String    @id
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year          Int
+  cardType      String    @default("BC50")
+  class         Int       @default(2)
+  cost          Float     @default(0)
+  validFrom     DateTime?
+  validTo       DateTime?
+  bahnCardNr    String?
+  justification String?
+  notes         String?
+  status        String    @default("DRAFT")
+  fileName      String?
+  filePath      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, year])
+}
+
+// ── Zum bestehenden User-Model hinzufügen (relations): ──
+//   sachkosten    Sachkosten[]
+//   bewirtungen   Bewirtung[]
+//   bahncards     BahnCard[]
