@@ -42,7 +42,7 @@ async function pollEmails() {
   const lock=await client.getMailboxLock("INBOX");
   try{
     const msgs = [];
-    for await(const msg of client.fetch({seen:false},{envelope:true,source:true,uid:true})){
+    for await(const msg of client.fetch("1:*",{envelope:true,source:true,uid:true})){
       msgs.push(msg);
     }
     console.log(`${msgs.length} ungelesene Mails`);
