@@ -6,7 +6,7 @@ const S = {
   input: { width:"100%", padding:"9px 12px", border:"1.5px solid #d4d0c8", borderRadius:8, fontSize:14, outline:"none", boxSizing:"border-box" as const },
 };
 
-interface BC { id:string; year:number; cardType:string; class:number; cost:number; validFrom:string; validTo:string; bahnCardNr:string; justification:string; notes:string; status:string; }
+interface BC { id:string; year:number; cardType:string; class:number; cost:number; validFrom:string; validTo:string; bahnCardNr:string; justification:string; notes:string; status:string; fileName?:string; filePath?:string; }
 
 export default function BahnCardPage() {
   const [list, setList] = useState<BC[]>([]);

@@ -7,7 +7,7 @@ const S = {
 };
 
 interface Participant { name:string; role:string; }
-interface BW { id:string; date:string; location:string; occasion:string; participants:string; amountFood:number; amountDrinks:number; amountTip:number; amountTotal:number; notes:string; }
+interface BW { id:string; date:string; location:string; occasion:string; participants:string; amountFood:number; amountDrinks:number; amountTip:number; amountTotal:number; notes:string; fileName?:string; filePath?:string; }
 
 const empty = ():Partial<BW>&{participantList:Participant[]} => ({date:"",location:"",occasion:"",amountFood:0,amountDrinks:0,amountTip:0,notes:"",participantList:[{name:"",role:""}]});
 
