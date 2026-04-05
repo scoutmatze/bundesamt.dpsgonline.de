@@ -87,7 +87,7 @@ async function pollEmails() {
           await pool.query('INSERT INTO "Receipt"(id,"tripId",description,amount,date,category,"isHandyticket","fromStation","toStation","fileName","filePath","mimeType","fileSize","createdAt")VALUES($1,$2,$3,$4,$5,\'FAHRT\',$6,$7,$8,$9,$10,$11,$12,NOW())',[rid,tripId,desc,amt,dt,ht,fromS,toS,safe,fp,att.contentType,att.size]);
           if(fromS&&toS){
             const rr=await pool.query('SELECT "fromStation","toStation" FROM "Receipt" WHERE "tripId"=$1 AND "fromStation" IS NOT NULL ORDER BY date',[tripId]);
-            if(rr.rows.length>0){const route=rr.rows.map(r=>r.fromStation).concat(rr.rows[rr.rows.length-1].toStation).join(" – ");await pool.query('UPDATE "Trip" SET route=$1,"updatedAt"=NOW() WHERE id=$2',[route,tripId])}
+            if(rr.rows.length>0){const stations=[rr.rows[0].fromStation];for(const r of rr.rows){if(r.fromStation!==stations[stations.length-1])stations.push(r.fromStation);if(r.toStation!==stations[stations.length-1])stations.push(r.toStation)};const route=stations.join(" – ");await pool.query('UPDATE "Trip" SET route=$1,"updatedAt"=NOW() WHERE id=$2',[route,tripId])}
           }
           console.log("  ✓ "+safe+(amt?` (${amt}€)`:" (manuell)"));
         }
