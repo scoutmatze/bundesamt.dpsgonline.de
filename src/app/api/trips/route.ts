@@ -51,3 +51,21 @@ export async function DELETE(req: NextRequest) {
   await prisma.trip.deleteMany({ where: { id, userId } });
   return NextResponse.json({ ok: true });
 }
+
+export async function PUT(req: NextRequest) {
+  const userId = await getUserId();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const data = await req.json();
+  const trip = await prisma.trip.findFirst({ where: { id: data.id, userId } });
+  if (!trip) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const updated = await prisma.trip.update({
+    where: { id: data.id },
+    data: {
+      purpose: data.purpose ?? trip.purpose,
+      route: data.route ?? trip.route,
+      startDate: data.startDate ? new Date(data.startDate) : trip.startDate,
+      endDate: data.endDate ? new Date(data.endDate) : trip.endDate,
+    },
+  });
+  return NextResponse.json(updated);
+}

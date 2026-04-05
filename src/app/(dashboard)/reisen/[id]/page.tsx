@@ -80,7 +80,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
       <button onClick={()=>router.push("/reisen")} style={{border:"none",background:"none",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer",padding:0}}>← Zurück</button>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginTop:8,marginBottom:20,gap:12,flexWrap:"wrap"}}>
         <div>
-          <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0}}>{trip.purpose}</h1>
+          <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0,cursor:"pointer"}} onClick={()=>{const n=prompt("Reisezweck umbenennen:",trip.purpose);if(n&&n!==trip.purpose)fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,purpose:n})}).then(()=>load())}}>{trip.purpose} <span style={{fontSize:14,color:"#9e9a92",fontWeight:400}}>✏️</span></h1>
           <p style={{fontSize:14,color:"#7a756c",margin:"4px 0 0"}}>{trip.travelMode==="PRIVAT_PKW"?"🚗":"🚂"} {trip.route||"—"} · {new Date(trip.startDate).toLocaleDateString("de-DE")}</p>
         </div>
         <div style={{display:"flex",gap:8}}>
