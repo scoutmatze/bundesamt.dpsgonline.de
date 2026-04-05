@@ -28,14 +28,14 @@ export async function POST(req: NextRequest) {
 
   const data = await req.json();
   const id = "bw" + randomBytes(12).toString("hex");
-  const total = (data.amountFood || 0) + (data.amountDrinks || 0) + (data.amountTip || 0);
+  const total = (parseFloat(data.amountFood) || 0) + (parseFloat(data.amountDrinks) || 0) + (parseFloat(data.amountTip) || 0);
 
   await prisma.$executeRaw`
     INSERT INTO "Bewirtung" (id, "userId", "tripId", date, location, occasion, participants,
       "amountFood", "amountDrinks", "amountTip", "amountTotal", notes)
     VALUES (${id}, ${userId}, ${data.tripId || null}, ${new Date(data.date)},
       ${data.location}, ${data.occasion}, ${JSON.stringify(data.participants || [])},
-      ${data.amountFood || 0}, ${data.amountDrinks || 0}, ${data.amountTip || 0},
+      ${parseFloat(data.amountFood) || 0}, ${parseFloat(data.amountDrinks) || 0}, ${parseFloat(data.amountTip) || 0},
       ${total}, ${data.notes || null})
   `;
 
@@ -47,14 +47,14 @@ export async function PUT(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const data = await req.json();
-  const total = (data.amountFood || 0) + (data.amountDrinks || 0) + (data.amountTip || 0);
+  const total = (parseFloat(data.amountFood) || 0) + (parseFloat(data.amountDrinks) || 0) + (parseFloat(data.amountTip) || 0);
 
   await prisma.$executeRaw`
     UPDATE "Bewirtung" SET
       date = ${new Date(data.date)}, location = ${data.location}, occasion = ${data.occasion},
       participants = ${JSON.stringify(data.participants || [])},
-      "amountFood" = ${data.amountFood || 0}, "amountDrinks" = ${data.amountDrinks || 0},
-      "amountTip" = ${data.amountTip || 0}, "amountTotal" = ${total},
+      "amountFood" = ${parseFloat(data.amountFood) || 0}, "amountDrinks" = ${parseFloat(data.amountDrinks) || 0},
+      "amountTip" = ${parseFloat(data.amountTip) || 0}, "amountTotal" = ${total},
       notes = ${data.notes || null}, "tripId" = ${data.tripId || null}, "updatedAt" = NOW()
     WHERE id = ${data.id} AND "userId" = ${userId}
   `;
