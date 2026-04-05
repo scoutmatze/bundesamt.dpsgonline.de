@@ -31,6 +31,9 @@ export function DashboardShell({ user, children }: { user: any; children: React.
 
   const nav = [
     { href:"/reisen", label:"Reisen", badge: pendingCount > 0 ? pendingCount : null },
+    { href:"/sachkosten", label:"Sachkosten", badge: null },
+    { href:"/bewirtung", label:"Bewirtung", badge: null },
+    { href:"/bahncard", label:"BahnCard", badge: null },
     { href:"/profil", label:"Profil", badge: null },
     ...(user.role === "ADMIN" ? [{ href:"/admin", label:"Admin", badge: null }] : []),
   ];
