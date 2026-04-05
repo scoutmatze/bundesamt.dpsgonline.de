@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     const handytickets=receipts.filter(r=>r.isHandyticket);
     let htOut: string|null=null;
     if(handytickets.length>0){
-      const htInput={name:`${user.firstName||""} ${user.lastName||""}`.trim(),tickets:handytickets.map(r=>({date:fmtDate(r.date),from:r.fromStation||"?",to:r.toStation||"?",amount:r.amount,order_nr:r.description?.match(/#(\d+)/)?.[1]||""})),signature_path:sigPath};
+      const htInput={name:`${user.firstName||""} ${user.lastName||""}`.trim(),tickets:handytickets.map(r=>({date:fmtDate(r.date),from:r.fromStation||"?",to:r.toStation||"?",amount:r.amount,order_nr:r.description?.match(/#(\d+)/)?.[1]||""})),signature_path:sigPath,notes:trip.notes||""};
       const htIn=`/tmp/ht_in_${tmpId}.json`;htOut=`/tmp/ht_out_${tmpId}.pdf`;
       writeFileSync(htIn,JSON.stringify(htInput));tmpFiles.push(htIn,htOut);
       try{execSync(`python3 ${genPath}/generate_handyticket.py ${htIn} ${htOut}`,{timeout:30000})}catch(e:any){console.error("HT failed:",e.message);htOut=null}

@@ -28,11 +28,12 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const [r, setR] = useState({ description:"",amount:"",date:"",category:"FAHRT",fromStation:"",toStation:"",isHandyticket:false });
   const [editData, setEditData] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [notes, setNotes] = useState("");
 
   const load = async () => {
     const res = await fetch("/api/trips"); const trips = await res.json();
     setAllTrips(trips);
-    setTrip(trips.find((t:any)=>t.id===id)||null);
+    const found=trips.find((t:any)=>t.id===id)||null;setTrip(found);if(found)setNotes(found.notes||"");
     setLoading(false);
   };
   useEffect(() => { load(); }, [id]);
@@ -54,6 +55,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
     setMoving(null); load();
   };
   const delReceipt = async (rid:string) => { await fetch("/api/receipts",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:rid,tripId:id})}); load(); };
+  const saveNotes = async (val:string) => { await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,notes:val})}); };
   const delTrip = async () => { if(!confirm("Reise wirklich löschen?"))return; await fetch("/api/trips",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); router.push("/reisen"); };
   const downloadPdf = async () => {
     const res=await fetch(`/api/pdf?tripId=${id}`);
@@ -100,6 +102,10 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         ))}
       </div>
 
+      <div style={{background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid #d4d0c8",marginBottom:16}}>
+        <label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>Hinweise für Buchhaltung / Kassenprüfung</label>
+        <textarea value={notes} onChange={e=>{setNotes(e.target.value)}} onBlur={e=>saveNotes(e.target.value)} placeholder="z.B. Zwei Reservierungen, weil eine für Person X damit wir zusammensitzen..." rows={3} style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit"}}/>
+      </div>
       <div style={{background:"#fff",borderRadius:12,padding:24,border:"1px solid #d4d0c8"}}>
         <h3 style={{fontSize:12,fontWeight:600,color:"#7a756c",textTransform:"uppercase",letterSpacing:1,marginTop:0,marginBottom:16}}>Belege ({receipts.length})</h3>
 

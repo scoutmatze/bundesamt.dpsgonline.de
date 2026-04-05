@@ -63,6 +63,7 @@ export async function PUT(req: NextRequest) {
     data: {
       purpose: data.purpose ?? trip.purpose,
       route: data.route ?? trip.route,
+      notes: data.notes ?? trip.notes,
       startDate: data.startDate ? new Date(data.startDate) : trip.startDate,
       endDate: data.endDate ? new Date(data.endDate) : trip.endDate,
     },

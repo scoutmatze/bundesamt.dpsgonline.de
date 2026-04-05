@@ -9,6 +9,7 @@ if os.path.exists(FP):pdfmetrics.registerFont(TTFont("DVSans",FP));FONT="DVSans"
 else:FONT="Helvetica"
 def generate(data,output_path):
     name=data["name"];tickets=data["tickets"];sig=data.get("signature_path")
+    notes=data.get("notes","")
     today=datetime.date.today().strftime("%d.%m.%Y")
     buf=io.BytesIO();c=canvas.Canvas(buf,pagesize=A4);w,h=A4
     c.setFont(FONT,14);c.drawString(60,h-60,"Erklärung zur Nutzung von Handytickets")
@@ -23,7 +24,13 @@ def generate(data,output_path):
         c.drawString(60,y,t.get("date",""));c.drawString(150,y,t.get("from","?"));c.drawString(280,y,t.get("to","?"))
         amt=t.get("amount",0);total+=amt;c.drawRightString(450,y,f"{amt:.2f} €".replace(".",","));c.drawString(470,y,t.get("order_nr",""));y-=16
     y-=4;c.line(60,y,w-60,y);y-=16;c.drawString(60,y,"Gesamt:");c.drawRightString(450,y,f"{total:.2f} €".replace(".",","))
-    y-=60;c.drawString(60,y,today);c.line(300,y-2,500,y-2);c.setFont(FONT,8);c.drawString(300,y-14,name)
+    # Notes section
+    if notes and notes.strip():
+        y-=30;c.setFont(FONT,9);c.setFillColor("#5c5850");c.drawString(60,y,"HINWEISE:")
+        y-=14;c.setFont(FONT,10);c.setFillColor("#1a1815")
+        for line in simpleSplit(notes.strip(),FONT,10,w-120):c.drawString(60,y,line);y-=14
+    # Signature
+    y-=40;c.setFillColor("#1a1815");c.drawString(60,y,today);c.line(300,y-2,500,y-2);c.setFont(FONT,8);c.drawString(300,y-14,name)
     if sig and os.path.exists(sig):
         try:
             from PIL import Image;si=Image.open(sig);sr=si.height/si.width;sw,sh=80,80*sr

@@ -80,6 +80,7 @@ model Trip {
 
   purpose      String
   route        String?
+  notes        String?
   startDate    DateTime
   startTime    String?
   endDate      DateTime?
