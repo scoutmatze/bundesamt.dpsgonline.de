@@ -65,7 +65,6 @@ async function pollEmails() {
         const dir=path.join(UPLOAD_DIR,u.id); if(!existsSync(dir)) mkdirSync(dir,{recursive:true});
 
         for(const att of atts){
-          const isKaufbeleg=att.filename.includes("Kaufbeleg");const safe=att.filename.replace(/[^a-zA-Z0-9._-]/g,"_");
           const dup=await pool.query('SELECT id FROM "Receipt" WHERE "tripId" IN (SELECT id FROM "Trip" WHERE "userId"=$1) AND "fileName"=$2',[u.id,safe]);
           if(dup.rows.length>0){console.log("  Skip dup: "+safe);continue}
           const fp=path.join(dir,Date.now()+"_"+safe); writeFileSync(fp,att.content);
@@ -83,7 +82,8 @@ async function pollEmails() {
 
           const tripId = await findOrCreateTrip(u.id, dt, parsed.subject || "Reise");
           const rid="c"+randomBytes(12).toString("hex");
-          if(isKaufbeleg){amt=0;ht=false;fromS=null;toS=null}
+          const isNachweis=isKaufbeleg||att.filename.includes("Reservierung");if(isNachweis){amt=0;ht=false;fromS=null;toS=null}
+            const isNachweis=isKaufbeleg||att.filename.includes("Reservierung");if(isNachweis){amt=0;ht=false;fromS=null;toS=null}
           const desc = orderNr ? `DB #${orderNr}: ${fromS||"?"} → ${toS||"?"}` : `Per E-Mail: ${(parsed.subject||att.filename).substring(0,80)}`;
           await pool.query('INSERT INTO "Receipt"(id,"tripId",description,amount,date,category,"isHandyticket","fromStation","toStation","fileName","filePath","mimeType","fileSize","createdAt")VALUES($1,$2,$3,$4,$5,\'FAHRT\',$6,$7,$8,$9,$10,$11,$12,NOW())',[rid,tripId,desc,amt,dt,ht,fromS,toS,safe,fp,att.contentType,att.size]);
           if(fromS&&toS){

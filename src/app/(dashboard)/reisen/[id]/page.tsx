@@ -72,7 +72,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const receipts=trip.receipts||[];
   const byC=(c:string)=>receipts.filter((r:any)=>r.category===c).reduce((s:number,r:any)=>s+r.amount,0);
   const total=receipts.reduce((s:number,r:any)=>s+r.amount,0);
-  const hasIncomplete=receipts.some((r:any)=>r.amount===0);
+  const hasIncomplete=receipts.some((r:any)=>r.amount===0&&r.category!=="NACHWEIS");
   const otherTrips=allTrips.filter((t:any)=>t.id!==id);
 
   return (
@@ -89,7 +89,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
 
-      {hasIncomplete && <div style={{padding:"10px 16px",borderRadius:8,background:"#fef3c7",color:"#92400e",fontSize:13,fontWeight:600,marginBottom:16,border:"1px solid #fde68a"}}>⚠️ {receipts.filter((r:any)=>r.amount===0).length} Beleg(e) ohne Betrag</div>}
+      {hasIncomplete && <div style={{padding:"10px 16px",borderRadius:8,background:"#fef3c7",color:"#92400e",fontSize:13,fontWeight:600,marginBottom:16,border:"1px solid #fde68a"}}>⚠️ {receipts.filter((r:any)=>r.amount===0&&r.category!=="NACHWEIS").length} Beleg(e) ohne Betrag</div>}
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))",gap:10,marginBottom:20}}>
         {[{l:"Fahrt",v:byC("FAHRT")},{l:"Unterkunft",v:byC("UNTERKUNFT")},{l:"Verpflegung",v:byC("VERPFLEGUNG")},{l:"Nebenkosten",v:byC("NEBENKOSTEN")},{l:"Gesamt",v:total,a:true}].map((c,i)=>(
