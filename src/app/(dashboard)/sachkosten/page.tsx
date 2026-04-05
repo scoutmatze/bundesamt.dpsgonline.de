@@ -54,6 +54,11 @@ export default function SachkostenPage() {
   const upItem = (idx:number, k:string, v:any) => { const n=[...items]; n[idx]={...n[idx],[k]:v}; setItems(n); };
   const delItem = (idx:number) => setItems(items.filter((_,i)=>i!==idx));
 
+  const uploadItemFile = async (itemId:string, file:File) => {
+    const fd = new FormData(); fd.append("file",file); fd.append("type","sachkosten"); fd.append("id",itemId);
+    const res = await fetch("/api/upload",{method:"POST",body:fd});
+    if(res.ok) load(); else alert("Upload fehlgeschlagen");
+  };
   const downloadPdf = async (sk:SK) => {
     const res = await fetch(`/api/sachkosten/pdf?id=${sk.id}`);
     if(!res.ok){ alert("PDF-Fehler"); return; }
@@ -104,6 +109,7 @@ export default function SachkostenPage() {
               <div><label style={S.label}>Datum</label><input type="date" value={item.date} onChange={e=>upItem(i,"date",e.target.value)} style={S.input}/></div>
               <div><label style={S.label}>Beschreibung</label><input value={item.description} onChange={e=>upItem(i,"description",e.target.value)} style={S.input} placeholder="z.B. Druckerpatronen"/></div>
               <div><label style={S.label}>Betrag €</label><input type="number" step="0.01" value={item.amount||""} onChange={e=>upItem(i,"amount",parseFloat(e.target.value)||0)} style={S.input}/></div>
+              <label style={{padding:"6px 8px",borderRadius:6,border:"1px solid #d4d0c8",background:item.id&&(item as any).fileName?"#d1fae5":"#fff",color:"#003056",fontSize:11,cursor:"pointer",marginBottom:10}}>{(item as any).fileName?"📎":"📤"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={e=>{if(e.target.files?.[0]&&item.id)uploadItemFile(item.id,e.target.files[0])}}/></label>
               <button onClick={()=>delItem(i)} style={{border:"none",background:"none",color:"#9e9a92",fontSize:16,cursor:"pointer",paddingBottom:10}}>✕</button>
             </div>
           ))}

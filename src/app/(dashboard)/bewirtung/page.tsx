@@ -55,6 +55,11 @@ export default function BewirtungPage() {
     load();
   };
 
+  const uploadFile = async (bwId:string, file:File) => {
+    const fd = new FormData(); fd.append("file",file); fd.append("type","bewirtung"); fd.append("id",bwId);
+    const res = await fetch("/api/upload",{method:"POST",body:fd});
+    if(res.ok) load(); else alert("Upload fehlgeschlagen");
+  };
   const downloadPdf = async (bw:BW) => {
     const res = await fetch(`/api/bewirtung/pdf?id=${bw.id}`);
     if(!res.ok){ alert("PDF-Fehler"); return; }
@@ -127,6 +132,7 @@ export default function BewirtungPage() {
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <span style={{fontWeight:700,fontSize:16,color:"#003056"}}>{fmt(bw.amountTotal)}</span>
             <button onClick={e=>{e.stopPropagation();downloadPdf(bw)}} title="PDF" style={{padding:"6px 10px",borderRadius:6,border:"1px solid #d4d0c8",background:"#fff",color:"#003056",fontSize:13,cursor:"pointer"}}>📄</button>
+            <label onClick={e=>e.stopPropagation()} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #d4d0c8",background:bw.fileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,cursor:"pointer"}}>{bw.fileName?"📎 "+bw.fileName:"📤 Beleg"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={e=>{if(e.target.files?.[0])uploadFile(bw.id,e.target.files[0])}}/></label>
             <button onClick={e=>{e.stopPropagation();del(bw.id)}} style={{border:"none",background:"none",color:"#9e9a92",fontSize:16,cursor:"pointer"}}>✕</button>
           </div>
         </div>

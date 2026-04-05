@@ -42,6 +42,11 @@ export default function BahnCardPage() {
     load();
   };
 
+  const uploadFile = async (bcId:string, file:File) => {
+    const fd = new FormData(); fd.append("file",file); fd.append("type","bahncard"); fd.append("id",bcId);
+    const res = await fetch("/api/upload",{method:"POST",body:fd});
+    if(res.ok) load(); else alert("Upload fehlgeschlagen");
+  };
   const downloadPdf = async (bc:BC) => {
     const res = await fetch(`/api/bahncard/pdf?id=${bc.id}`);
     if(!res.ok){ alert("PDF-Fehler"); return; }
@@ -79,6 +84,10 @@ export default function BahnCardPage() {
 
         <div><label style={S.label}>Begründung</label><textarea value={form.justification||""} onChange={e=>up("justification",e.target.value)} rows={3} placeholder="Warum BahnCard? Erwartete Fahrten, Ersparnis..." style={{...S.input,resize:"vertical",fontFamily:"inherit"}}/></div>
 
+        <div style={{background:"#dbeafe",borderRadius:8,padding:"12px 16px",border:"1px solid #bfdbfe"}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#1e40af",marginBottom:6}}>BahnCard-Ersparnis berechnen</div>
+          <p style={{fontSize:12,color:"#1e40af",margin:"0 0 8px"}}>Berechne deine Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" rel="noopener" style={{color:"#1e40af",fontWeight:700}}>bcbp.db-app.de</a> und lade das Ergebnis-PDF hier hoch.</p>
+        </div>
         <div><label style={S.label}>Hinweise</label><textarea value={form.notes||""} onChange={e=>up("notes",e.target.value)} rows={2} placeholder="Optional" style={{...S.input,resize:"vertical",fontFamily:"inherit"}}/></div>
       </div>
       <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
@@ -113,6 +122,7 @@ export default function BahnCardPage() {
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <span style={{fontWeight:700,fontSize:16,color:"#003056"}}>{fmt(bc.cost)}</span>
             <button onClick={e=>{e.stopPropagation();downloadPdf(bc)}} title="PDF" style={{padding:"6px 10px",borderRadius:6,border:"1px solid #d4d0c8",background:"#fff",color:"#003056",fontSize:13,cursor:"pointer"}}>📄</button>
+            <label onClick={e=>e.stopPropagation()} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #d4d0c8",background:bc.fileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,cursor:"pointer"}}>{bc.fileName?"📎 "+bc.fileName:"📤 Beleg"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={e=>{if(e.target.files?.[0])uploadFile(bc.id,e.target.files[0])}}/></label>
             <button onClick={e=>{e.stopPropagation();del(bc.id)}} style={{border:"none",background:"none",color:"#9e9a92",fontSize:16,cursor:"pointer"}}>✕</button>
           </div>
         </div>
