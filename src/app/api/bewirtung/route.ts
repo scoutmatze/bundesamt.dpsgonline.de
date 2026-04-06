@@ -32,11 +32,11 @@ export async function POST(req: NextRequest) {
 
   await prisma.$executeRaw`
     INSERT INTO "Bewirtung" (id, "userId", "tripId", date, location, occasion, participants,
-      "amountFood", "amountDrinks", "amountTip", "amountTotal", notes, "hostName")
+      "amountFood", "amountDrinks", "amountTip", "amountTotal", notes, "hostName", "isHost")
     VALUES (${id}, ${userId}, ${data.tripId || null}, ${new Date(data.date)},
       ${data.location}, ${data.occasion}, ${JSON.stringify(data.participants || [])},
       ${parseFloat(data.amountFood) || 0}, ${parseFloat(data.amountDrinks) || 0}, ${parseFloat(data.amountTip) || 0},
-      ${total}, ${data.notes || null}, ${data.hostName || null})
+      ${total}, ${data.notes || null}, ${data.hostName || null}, ${data.isHost !== false})
   `;
 
   return NextResponse.json({ id }, { status: 201 });
@@ -55,7 +55,7 @@ export async function PUT(req: NextRequest) {
       participants = ${JSON.stringify(data.participants || [])},
       "amountFood" = ${parseFloat(data.amountFood) || 0}, "amountDrinks" = ${parseFloat(data.amountDrinks) || 0},
       "amountTip" = ${parseFloat(data.amountTip) || 0}, "amountTotal" = ${total},
-      notes = ${data.notes || null}, "hostName" = ${data.hostName || null}, "tripId" = ${data.tripId || null}, "updatedAt" = NOW()
+      notes = ${data.notes || null}, "hostName" = ${data.hostName || null}, "isHost" = ${data.isHost !== false}, "tripId" = ${data.tripId || null}, "updatedAt" = NOW()
     WHERE id = ${data.id} AND "userId" = ${userId}
   `;
 

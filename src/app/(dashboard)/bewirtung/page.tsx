@@ -38,7 +38,7 @@ export default function BewirtungPage() {
     let pl:Participant[] = [];
     try { pl = JSON.parse(bw.participants); } catch { pl = []; }
     setEditing(bw.id);
-    setForm({...bw, date:bw.date?.split("T")[0]||"", participantList: pl.length?pl:[{name:"",role:""}]});
+    setForm({...bw, isHost:bw.isHost!==false, date:bw.date?.split("T")[0]||"", participantList: pl.length?pl:[{name:"",role:""}]});
     setAdding(false);
   };
 
@@ -96,7 +96,7 @@ export default function BewirtungPage() {
             <input type="checkbox" checked={form.isHost!==false} onChange={e=>up("isHost",e.target.checked)} style={{width:18,height:18,accentColor:"#003056"}}/> Ich bin die bewirtende Person
           </label>
         </div>
-        {!form.isHost && <div style={{marginBottom:8}}><label style={S.label}>Bewirtende Person</label><input value={form.hostName||""} onChange={e=>up("hostName",e.target.value)} placeholder="Name der bewirtenden Person" style={S.input}/></div>}
+        {form.isHost===false && <div style={{marginBottom:8}}><label style={S.label}>Bewirtende Person</label><input value={form.hostName||""} onChange={e=>up("hostName",e.target.value)} placeholder="Name der bewirtenden Person" style={S.input}/></div>}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
           <div><label style={S.label}>Speisen €</label><input type="number" step="0.01" value={form.amountFood||""} onChange={e=>up("amountFood",e.target.value)} style={S.input}/></div>
           <div><label style={S.label}>Getränke €</label><input type="number" step="0.01" value={form.amountDrinks||""} onChange={e=>up("amountDrinks",e.target.value)} style={S.input}/></div>
