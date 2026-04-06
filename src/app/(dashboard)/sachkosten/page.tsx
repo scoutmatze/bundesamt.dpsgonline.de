@@ -105,7 +105,7 @@ export default function SachkostenPage() {
           <h3 style={{fontSize:16,fontWeight:700,color:"#003056",marginTop:0}}>Q{sk.quarter}/{sk.year} bearbeiten</h3>
 
           {items.map((item,i) => (
-            <div key={i} style={{display:"grid",gridTemplateColumns:"120px 1fr 100px auto",gap:8,marginBottom:8,alignItems:"end"}}>
+            <div key={i} style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(80px, 1fr))",gap:8,marginBottom:8,alignItems:"end"}}>
               <div><label style={S.label}>Datum</label><input type="date" value={item.date} onChange={e=>upItem(i,"date",e.target.value)} style={S.input}/></div>
               <div><label style={S.label}>Beschreibung</label><input value={item.description} onChange={e=>upItem(i,"description",e.target.value)} style={S.input} placeholder="z.B. Druckerpatronen"/></div>
               <div><label style={S.label}>Betrag €</label><input type="number" step="0.01" value={item.amount||""} onChange={e=>upItem(i,"amount",parseFloat(e.target.value)||0)} style={S.input}/></div>

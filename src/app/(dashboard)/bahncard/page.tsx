@@ -60,7 +60,7 @@ export default function BahnCardPage() {
     <div style={{background:"#fff",borderRadius:12,padding:24,border:"1px solid #d4d0c8",marginBottom:16}}>
       <h3 style={{fontSize:16,fontWeight:700,color:"#003056",marginTop:0}}>{editing?"BahnCard bearbeiten":"Neuer BahnCard-Antrag"}</h3>
       <div style={{display:"grid",gap:12}}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(100px, 1fr))",gap:10}}>
           <div><label style={S.label}>Jahr</label><input type="number" value={form.year} onChange={e=>up("year",+e.target.value)} style={S.input}/></div>
           <div><label style={S.label}>Typ</label>
             <select value={form.cardType} onChange={e=>up("cardType",e.target.value)} style={{...S.input,background:"#fff"}}>
@@ -74,7 +74,7 @@ export default function BahnCardPage() {
           </div>
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(100px, 1fr))",gap:10}}>
           <div><label style={S.label}>Kosten €</label><input type="number" step="0.01" value={form.cost||""} onChange={e=>up("cost",parseFloat(e.target.value)||0)} style={S.input}/></div>
           <div><label style={S.label}>Gültig ab</label><input type="date" value={form.validFrom} onChange={e=>up("validFrom",e.target.value)} style={S.input}/></div>
           <div><label style={S.label}>Gültig bis</label><input type="date" value={form.validTo} onChange={e=>up("validTo",e.target.value)} style={S.input}/></div>
@@ -87,6 +87,10 @@ export default function BahnCardPage() {
         <div style={{background:"#dbeafe",borderRadius:8,padding:"12px 16px",border:"1px solid #bfdbfe"}}>
           <div style={{fontSize:13,fontWeight:700,color:"#1e40af",marginBottom:6}}>BahnCard-Ersparnis berechnen</div>
           <p style={{fontSize:12,color:"#1e40af",margin:"0 0 8px"}}>Berechne deine Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" rel="noopener" style={{color:"#1e40af",fontWeight:700}}>bcbp.db-app.de</a> und lade das Ergebnis-PDF hier hoch.</p>
+        </div>
+        <div style={{marginBottom:12}}>
+          <label style={S.label}>Beleg / Ersparnis-PDF</label>
+          <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:form.fileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6}}>{form.fileName?"📎 "+form.fileName:"📤 Datei hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={async e=>{if(!e.target.files?.[0]||!editing)return;const fd=new FormData();fd.append("file",e.target.files[0]);fd.append("type","bahncard");fd.append("id",editing);const res=await fetch("/api/upload",{method:"POST",body:fd});if(res.ok){const d=await res.json();up("fileName",d.fileName);load()}else alert("Upload fehlgeschlagen")}}/></label>
         </div>
         <div><label style={S.label}>Hinweise</label><textarea value={form.notes||""} onChange={e=>up("notes",e.target.value)} rows={2} placeholder="Optional" style={{...S.input,resize:"vertical",fontFamily:"inherit"}}/></div>
       </div>

@@ -164,8 +164,8 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
               <div style={{fontSize:12,color:"#9e9a92"}}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}{rc.fileName?` · 📎 ${rc.fileName}`:""}</div>
             </div>
             <div style={{fontWeight:700,fontSize:15,color:rc.amount===0?"#f59e0b":"#003056"}}>{rc.amount===0?"—":fmt(rc.amount)}</div>
-            <button onClick={()=>{setMoving(rc.id);setEditing(null)}} title="Verschieben" style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:14}}>↗️</button>
-            <button onClick={(e)=>{e.stopPropagation();delReceipt(rc.id)}} style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:16}}>✕</button>
+            <button onClick={()=>{setMoving(rc.id);setEditing(null)}} title="Verschieben" style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:18,padding:"8px"}}>↗️</button>
+            <button onClick={(e)=>{e.stopPropagation();delReceipt(rc.id)}} style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:20,padding:"8px"}}>✕</button>
           </div>
         ))}
 
