@@ -65,6 +65,7 @@ async function pollEmails() {
         const dir=path.join(UPLOAD_DIR,u.id); if(!existsSync(dir)) mkdirSync(dir,{recursive:true});
 
         for(const att of atts){
+          const safe=att.filename.replace(/[^a-zA-Z0-9._-]/g,"_");
           const dup=await pool.query('SELECT id FROM "Receipt" WHERE "tripId" IN (SELECT id FROM "Trip" WHERE "userId"=$1) AND "fileName"=$2',[u.id,safe]);
           if(dup.rows.length>0){console.log("  Skip dup: "+safe);continue}
           const fp=path.join(dir,Date.now()+"_"+safe); writeFileSync(fp,att.content);
