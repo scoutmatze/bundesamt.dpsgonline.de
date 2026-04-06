@@ -29,7 +29,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/verify", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ email, code }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      router.push(data.needsProfile ? "/profil" : "/reisen");
+      router.push(data.needsProfile ? "/profil" : "/dashboard");
     } catch (e: any) { setError(e.message || "Ungültiger Code"); }
     finally { setLoading(false); }
   };

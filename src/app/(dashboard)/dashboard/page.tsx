@@ -67,7 +67,7 @@ export default function DashboardPage() {
       <h1 style={{ fontSize: 24, fontWeight: 700, color: "#003056", marginBottom: 24 }}>Dashboard</h1>
 
       {/* Overview Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 14, marginBottom: 32 }}>
         {cards.map(c => (
           <Link key={c.href} href={c.href} style={{ textDecoration: "none" }}>
             <div style={{
