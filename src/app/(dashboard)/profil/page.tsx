@@ -1,4 +1,5 @@
 "use client";
+import SignaturePad from "@/components/SignaturePad";
 import { useState, useEffect, useRef } from "react";
 
 const S = {

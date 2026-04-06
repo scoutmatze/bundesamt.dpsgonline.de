@@ -85,7 +85,7 @@ async function pollEmails() {
           if (!isDbTicket) {
             // Non-DB attachment → Inbox
             let preview="";
-            try{const {execSync:ex}=await import("child_process");preview=ex(`python3 -c "import pdfplumber\nwith pdfplumber.open('${fp}') as pdf:\n  for p in pdf.pages[:1]:\n    t=p.extract_text()\n    if t: print(t[:500])"`,{timeout:10000}).toString().trim()}catch{}
+            try{preview=execSync(`python3 -c "import pdfplumber\nwith pdfplumber.open('${fp}') as pdf:\n  for p in pdf.pages[:1]:\n    t=p.extract_text()\n    if t: print(t[:500])"`,{timeout:10000}).toString().trim()}catch{}
             const iid="in"+randomBytes(12).toString("hex");
             await pool.query('INSERT INTO "InboxItem"(id,"userId","fileName","filePath","mimeType","fileSize","subject","preview",status,"createdAt")VALUES($1,$2,$3,$4,$5,$6,$7,$8,\'NEW\',$9)',[iid,u.id,safe,fp,att.contentType,att.size,parsed.subject||null,preview||null,new Date()]);
             console.log("  → Inbox: "+safe);

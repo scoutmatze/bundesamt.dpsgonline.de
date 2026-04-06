@@ -148,6 +148,25 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         <p style={{fontSize:11,color:"#9e9a92",marginTop:8,marginBottom:0}}>📍 = Entfernung per OpenStreetMap berechnen (DSGVO-konform). Alternativ manuell eingeben.</p>
       </div>)}
 
+      {trip.startTime && trip.endTime && (
+      <div style={{background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid #d4d0c8",marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <label style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6}}>Verpflegungspauschale</label>
+          <span style={{fontSize:13,color:"#7a756c"}}>{(()=>{
+            const s=new Date(`${trip.startDate?.split("T")[0]}T${trip.startTime}`);
+            const e=new Date(`${(trip.endDate||trip.startDate)?.split("T")[0]}T${trip.endTime}`);
+            const days=Math.ceil((e.getTime()-s.getTime())/(1000*60*60*24));
+            const hours=(e.getTime()-s.getTime())/(1000*60*60);
+            if(days<=0&&hours<=8)return "Abwesenheit ≤ 8h — keine Pauschale";
+            if(days<=0&&hours>8)return `${hours.toFixed(1)}h Abwesenheit → 14,00 €`;
+            const anreise=14;const abreise=14;const zwischen=(days-1)*28;
+            const total=anreise+abreise+zwischen;
+            return `${days+1} Tage → ${total.toFixed(2).replace(".",",")} € (${anreise}+${zwischen>0?zwischen+"+(Zwischentage) ":""}${abreise})`;
+          })()}</span>
+        </div>
+        <p style={{fontSize:11,color:"#9e9a92",margin:"6px 0 0"}}>Anreisetag: 14 € · Ganzer Tag: 28 € · Abreisetag: 14 € — Kürzungen bei gestellten Mahlzeiten nicht berücksichtigt</p>
+      </div>)}
+
         <label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>Hinweise für Buchhaltung / Kassenprüfung</label>
         <textarea value={notes} onChange={e=>{setNotes(e.target.value)}} onBlur={e=>saveNotes(e.target.value)} placeholder="z.B. Zwei Reservierungen, weil eine für Person X damit wir zusammensitzen..." rows={3} style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit"}}/>
       </div>

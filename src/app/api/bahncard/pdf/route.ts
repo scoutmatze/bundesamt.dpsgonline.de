@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const input = {
     name,
     address: [user.street, `${user.zipCode || ""} ${user.city || ""}`].filter(Boolean).join(", "),
-    gremium: "", year: bc.year,
+    gremium: user.gremium || "", year: bc.year,
     card_type: bc.cardType, class: bc.class, cost: bc.cost,
     valid_from: fmtDate(bc.validFrom), valid_to: fmtDate(bc.validTo),
     bahncard_nr: bc.bahnCardNr || "",

@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
   const input = {
     name,
-    gremium: "",
+    gremium: user.gremium || "",
     date: new Date(bw.date).toLocaleDateString("de-DE"),
     location: bw.location,
     occasion: bw.occasion,
