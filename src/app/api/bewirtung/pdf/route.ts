@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     amount_drinks: bw.amountDrinks,
     amount_tip: bw.amountTip,
     notes: bw.notes || "",
+    host_name: bw.hostName || null,
     signature_path: user.signaturePath || null,
   };
 

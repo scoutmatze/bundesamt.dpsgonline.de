@@ -77,7 +77,8 @@ def generate(data, output_path):
     host_idx = len(participants)
     if host_idx < 17:
         y = PERSONEN_START_Y - (host_idx * PERSONEN_SPACING)
-        c.drawString(PERSONEN_X, y, f"{name} (bewirtende Person)")
+        host = data.get("host_name") or name
+        c.drawString(PERSONEN_X, y, f"{host} (bewirtende Person)")
 
     # Anlass der Bewirtung (max 3 lines, ~65 chars per line)
     words = occasion.split()
