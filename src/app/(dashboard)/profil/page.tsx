@@ -13,7 +13,7 @@ const S = {
 };
 
 export default function ProfilPage() {
-  const [p, setP] = useState({ firstName:"", lastName:"", street:"", zipCode:"", city:"", iban:"", bic:"", bank:"", accountHolder:"" });
+  const [p, setP] = useState({ firstName:"", lastName:"", street:"", zipCode:"", city:"", iban:"", bic:"", bank:"", accountHolder:"", gremium:"" });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [sigUrl, setSigUrl] = useState<string|null>(null);
@@ -22,7 +22,7 @@ export default function ProfilPage() {
 
   useEffect(() => {
     fetch("/api/profile").then(r=>r.json()).then(d => {
-      setP({ firstName:d.firstName||"", lastName:d.lastName||"", street:d.street||"", zipCode:d.zipCode||"", city:d.city||"", iban:d.ibanEncrypted||"", bic:d.bic||"", bank:d.bank||"", accountHolder:d.accountHolder||"" });
+      setP({ firstName:d.firstName||"", lastName:d.lastName||"", street:d.street||"", zipCode:d.zipCode||"", city:d.city||"", iban:d.ibanEncrypted||"", bic:d.bic||"", bank:d.bank||"", accountHolder:d.accountHolder||"", gremium:d.gremium||"" });
       if (d.signaturePath) setSigUrl("/api/signature?t=" + Date.now());
     });
   }, []);
@@ -56,6 +56,7 @@ export default function ProfilPage() {
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>{inp("Vorname *","firstName")}{inp("Nachname *","lastName")}</div>
           {inp("Straße","street")}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:12 }}>{inp("PLZ","zipCode")}{inp("Ort","city")}</div>
+          {inp("Gremium","gremium",{placeholder:"z.B. Bundesleitung, AG Finanzen..."})}
         </div>
       </div>
 

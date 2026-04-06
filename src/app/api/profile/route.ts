@@ -34,6 +34,7 @@ export async function PUT(req: NextRequest) {
       zipCode: data.zipCode,
       city: data.city,
       bank: data.bank,
+      gremium: data.gremium,
       bic: data.bic,
       ibanEncrypted: data.iban, // TODO: encrypt with AES-256
       accountHolder: data.accountHolder,
