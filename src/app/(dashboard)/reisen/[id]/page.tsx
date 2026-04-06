@@ -152,13 +152,13 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
             <div style={{display:"grid",gap:10}}>
               <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10}}>
                 <div><label style={S.label}>Beschreibung</label><input value={editData.description} onChange={e=>upEdit("description",e.target.value)} style={S.input}/></div>
-                <div><label style={S.label}>Kategorie</label><select value={editData.category} onChange={e=>upEdit("category",e.target.value)} style={{...S.input,background:"#fff"}}><option value="FAHRT">Fahrtkosten</option><option value="UNTERKUNFT">Unterkunft</option><option value="VERPFLEGUNG">Verpflegung</option><option value="NEBENKOSTEN">Nebenkosten</option></select></div>
+                <div><label style={S.label}>Kategorie</label><select value={editData.category} onChange={e=>upEdit("category",e.target.value)} style={{...S.input,background:"#fff"}}><option value="FAHRT">{trip.travelMode==="MIETWAGEN"?"Mietwagenkosten":trip.travelMode==="PRIVAT_PKW"?"Fahrtkosten (PKW)":"Fahrtkosten"}</option><option value="UNTERKUNFT">Unterkunft</option><option value="VERPFLEGUNG">Verpflegung</option><option value="NEBENKOSTEN">{(trip.travelMode==="PRIVAT_PKW"||trip.travelMode==="MIETWAGEN")?"Tankrechnung / Maut / Parken":"Nebenkosten"}</option></select></div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                 <div><label style={S.label}>Betrag (€)</label><input type="number" step="0.01" value={editData.amount} onChange={e=>upEdit("amount",e.target.value)} style={{...S.input,borderColor:editData.amount==0?"#f59e0b":"#d4d0c8"}} autoFocus/></div>
                 <div><label style={S.label}>Datum</label><input type="date" value={editData.date} onChange={e=>upEdit("date",e.target.value)} style={S.input}/></div>
               </div>
-              {editData.category==="FAHRT"&&<>
+              {editData.category==="FAHRT"&&trip.travelMode==="BAHN"&&<>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   <div><label style={S.label}>Von</label><input value={editData.fromStation} onChange={e=>upEdit("fromStation",e.target.value)} style={S.input}/></div>
                   <div><label style={S.label}>Nach</label><input value={editData.toStation} onChange={e=>upEdit("toStation",e.target.value)} style={S.input}/></div>
@@ -213,13 +213,13 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
             <div style={{display:"grid",gap:12}}>
               <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10}}>
                 <div><label style={S.label}>Beschreibung</label><input value={r.description} onChange={e=>up("description",e.target.value)} placeholder="z.B. DB Sparpreis" style={S.input}/></div>
-                <div><label style={S.label}>Kategorie</label><select value={r.category} onChange={e=>up("category",e.target.value)} style={{...S.input,background:"#fff"}}><option value="FAHRT">Fahrtkosten</option><option value="UNTERKUNFT">Unterkunft</option><option value="VERPFLEGUNG">Verpflegung</option><option value="NEBENKOSTEN">Nebenkosten</option></select></div>
+                <div><label style={S.label}>Kategorie</label><select value={r.category} onChange={e=>up("category",e.target.value)} style={{...S.input,background:"#fff"}}><option value="FAHRT">{trip.travelMode==="MIETWAGEN"?"Mietwagenkosten":trip.travelMode==="PRIVAT_PKW"?"Fahrtkosten (PKW)":"Fahrtkosten"}</option><option value="UNTERKUNFT">Unterkunft</option><option value="VERPFLEGUNG">Verpflegung</option><option value="NEBENKOSTEN">{(trip.travelMode==="PRIVAT_PKW"||trip.travelMode==="MIETWAGEN")?"Tankrechnung / Maut / Parken":"Nebenkosten"}</option></select></div>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                 <div><label style={S.label}>Betrag (€)</label><input type="number" step="0.01" value={r.amount} onChange={e=>up("amount",e.target.value)} placeholder="44.80" style={S.input}/></div>
                 <div><label style={S.label}>Datum</label><input type="date" value={r.date} onChange={e=>up("date",e.target.value)} style={S.input}/></div>
               </div>
-              {r.category==="FAHRT"&&<>
+              {r.category==="FAHRT"&&trip.travelMode==="BAHN"&&<>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   <div><label style={S.label}>Von</label><input value={r.fromStation} onChange={e=>up("fromStation",e.target.value)} placeholder="München Hbf" style={S.input}/></div>
                   <div><label style={S.label}>Nach</label><input value={r.toStation} onChange={e=>up("toStation",e.target.value)} placeholder="Montabaur" style={S.input}/></div>
