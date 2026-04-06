@@ -87,8 +87,13 @@ async function pollEmails() {
             // Non-DB attachment → Inbox
             let preview="";
             try{preview=execSync(`python3 -c "import pdfplumber\nwith pdfplumber.open('${fp}') as pdf:\n  for p in pdf.pages[:1]:\n    t=p.extract_text()\n    if t: print(t[:500])"`,{timeout:10000}).toString().trim()}catch{}
+            // Try to extract amount from receipt
+            let receiptAmount=null;
+            if(/\.pdf$/i.test(safe)){
+              try{const rp=execSync(\`python3 /app/pdf-generator/parse_receipt.py "\${fp}"\`,{timeout:10000}).toString().trim();const rd=JSON.parse(rp);if(rd.amount)receiptAmount=rd.amount;if(rd.text_preview&&!preview)preview=rd.text_preview}catch{}
+            }
             const iid="in"+randomBytes(12).toString("hex");
-            await pool.query('INSERT INTO "InboxItem"(id,"userId","fileName","filePath","mimeType","fileSize","subject","preview",status,"createdAt")VALUES($1,$2,$3,$4,$5,$6,$7,$8,\'NEW\',$9)',[iid,u.id,safe,fp,att.contentType,att.size,parsed.subject||null,preview||null,new Date()]);
+            await pool.query('INSERT INTO "InboxItem"(id,"userId","fileName","filePath","mimeType","fileSize","subject","preview",status,"createdAt","amount")VALUES($1,$2,$3,$4,$5,$6,$7,$8,\'NEW\',$9,$10)',[iid,u.id,safe,fp,att.contentType,att.size,parsed.subject||null,preview||null,new Date(),receiptAmount]);
             console.log("  → Inbox: "+safe);
             continue;
           }

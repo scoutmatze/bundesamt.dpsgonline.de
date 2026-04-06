@@ -5,7 +5,7 @@ const S = {
   label: { display:"block", fontSize:12, fontWeight:600, color:"#5c5850", marginBottom:5, textTransform:"uppercase" as const, letterSpacing:0.6 },
 };
 
-interface InboxItem { id:string; fileName:string; filePath:string; subject?:string; preview?:string; status:string; assignedType?:string; createdAt:string; }
+interface InboxItem { id:string; fileName:string; filePath:string; subject?:string; preview?:string; status:string; assignedType?:string; createdAt:string; amount?:number; }
 
 export default function PosteingangPage() {
   const [items, setItems] = useState<InboxItem[]>([]);
@@ -89,6 +89,7 @@ export default function PosteingangPage() {
             <div style={{flex:1,cursor:"pointer"}} onClick={()=>showPreview(item.filePath)}>
               <div style={{fontSize:15,fontWeight:600,color:"#1a1815",display:"flex",alignItems:"center",gap:8}}>
                 📎 {item.fileName}
+                {item.amount?<span style={{padding:"2px 8px",borderRadius:12,background:"#d1fae5",color:"#065f46",fontSize:11,fontWeight:700}}>{item.amount.toFixed(2).replace(".",",")} €</span>:null}
                 <span style={{padding:"2px 8px",borderRadius:12,background:"#dbeafe",color:"#1e40af",fontSize:11,fontWeight:700}}>Neu</span>
               </div>
               <div style={{fontSize:12,color:"#9e9a92",marginTop:2}}>
