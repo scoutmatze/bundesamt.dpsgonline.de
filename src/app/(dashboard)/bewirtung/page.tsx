@@ -91,6 +91,12 @@ export default function BewirtungPage() {
           <button onClick={addParticipant} style={{padding:"4px 12px",borderRadius:6,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Person</button>
         </div>
 
+        <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:4}}>
+          <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#5c5850",cursor:"pointer"}}>
+            <input type="checkbox" checked={form.isHost!==false} onChange={e=>up("isHost",e.target.checked)} style={{width:18,height:18,accentColor:"#003056"}}/> Ich bin die bewirtende Person
+          </label>
+        </div>
+        {!form.isHost && <div style={{marginBottom:8}}><label style={S.label}>Bewirtende Person</label><input value={form.hostName||""} onChange={e=>up("hostName",e.target.value)} placeholder="Name der bewirtenden Person" style={S.input}/></div>}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
           <div><label style={S.label}>Speisen €</label><input type="number" step="0.01" value={form.amountFood||""} onChange={e=>up("amountFood",e.target.value)} style={S.input}/></div>
           <div><label style={S.label}>Getränke €</label><input type="number" step="0.01" value={form.amountDrinks||""} onChange={e=>up("amountDrinks",e.target.value)} style={S.input}/></div>

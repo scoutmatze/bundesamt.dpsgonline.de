@@ -44,53 +44,35 @@ export async function GET(req: NextRequest) {
   try {
     execSync(`python3 /app/pdf-generator/generate_sachkosten.py ${inFile} ${outFile}`, { timeout: 30000 });
 
-    // Collect all Belege from items
-    const belegPaths = items
-      .filter(i => i.filePath && existsSync(i.filePath))
-      .map(i => i.filePath);
+    // Collect Belege
+    const belegPaths = items.filter(i => i.filePath && existsSync(i.filePath)).map(i => i.filePath as string);
 
     if (belegPaths.length > 0) {
-      const pathsJson = JSON.stringify(belegPaths);
+      const pathsFile = `${tmp}_paths.json`;
+      writeFileSync(pathsFile, JSON.stringify(belegPaths));
       try {
-        execSync(`python3 -c "
-import json
-from pypdf import PdfWriter, PdfReader
-w = PdfWriter()
-for p in PdfReader('${outFile}').pages: w.add_page(p)
-for bp in ${pathsJson}:
-    try:
-        for p in PdfReader(bp).pages: w.add_page(p)
-    except: pass
-w.write('${mergedFile}')
-"`, { timeout: 30000 });
+        execSync(`python3 /app/pdf-generator/merge_belege.py ${outFile} ${pathsFile} ${mergedFile}`, { timeout: 30000 });
         const pdf = readFileSync(mergedFile);
-        cleanup(inFile, outFile, mergedFile);
+        cleanup(inFile, outFile, mergedFile, pathsFile);
         return pdfResponse(pdf, `Sachkosten_Q${sk.quarter}_${sk.year}.pdf`);
-      } catch {
-        // If merge fails, return just the form
-      }
+      } catch { cleanup(pathsFile); }
     }
 
     const pdf = readFileSync(outFile);
-    cleanup(inFile, outFile, mergedFile);
+    cleanup(inFile, outFile);
     return pdfResponse(pdf, `Sachkosten_Q${sk.quarter}_${sk.year}.pdf`);
   } catch (e: any) {
     cleanup(inFile, outFile, mergedFile);
-    return NextResponse.json({ error: "PDF generation failed: " + e.message }, { status: 500 });
+    return NextResponse.json({ error: "PDF failed: " + e.message }, { status: 500 });
   }
 }
 
-function pdfResponse(data: Buffer | Uint8Array | Uint8Array, filename: string) {
+function pdfResponse(data: Buffer | Uint8Array, filename: string) {
   return new NextResponse(new Uint8Array(data), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-    },
+    headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${filename}"` },
   });
 }
 
 function cleanup(...files: string[]) {
-  for (const f of files) {
-    try { if (existsSync(f)) unlinkSync(f); } catch {}
-  }
+  for (const f of files) { try { if (existsSync(f)) unlinkSync(f); } catch {} }
 }

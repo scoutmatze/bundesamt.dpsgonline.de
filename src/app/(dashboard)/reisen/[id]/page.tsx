@@ -149,6 +149,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
                 ))}
               </div>
             )}
+            <button onClick={async()=>{const purpose=prompt("Reisezweck für neue Reise:");if(!purpose)return;const res=await fetch("/api/trips",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({purpose,startDate:new Date().toISOString(),travelMode:"BAHN"})});if(res.ok){const trip=await res.json();await moveReceipt(rc.id,trip.id)}}} style={{padding:"10px 14px",borderRadius:8,border:"2px dashed #003056",background:"#f5f3ef",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer",textAlign:"left",width:"100%"}}>+ Neue Reise mit diesem Beleg erstellen</button>
             <button onClick={()=>setMoving(null)} style={{marginTop:8,padding:"6px 14px",borderRadius:6,border:"1px solid #bfdbfe",background:"transparent",color:"#1e40af",fontSize:12,cursor:"pointer"}}>Abbrechen</button>
           </div>
         ) : (
