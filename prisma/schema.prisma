@@ -101,6 +101,7 @@ model Trip {
   travelMode   TravelMode @default(BAHN)
   pkwReason    String?
   licensePlate String?
+  mietwagenApproved Boolean? @default(false)
   co2Offset    Boolean    @default(false)
 
   status       TripStatus @default(DRAFT)

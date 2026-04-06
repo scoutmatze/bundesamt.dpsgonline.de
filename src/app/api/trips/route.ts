@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       travelMode: data.travelMode || "BAHN",
       pkwReason: data.pkwReason || null,
       licensePlate: data.licensePlate || null,
+      mietwagenApproved: data.mietwagenApproved || false,
     },
     include: { receipts: true },
   });
