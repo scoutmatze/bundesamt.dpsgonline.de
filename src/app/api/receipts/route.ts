@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
       fromStation: data.fromStation || null,
       toStation: data.toStation || null,
       isHandyticket: data.isHandyticket || false,
+      fileName: data.fileName || null,
+      filePath: data.filePath || null,
     },
   });
 

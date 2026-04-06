@@ -26,6 +26,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const [editing, setEditing] = useState<string|null>(null);
   const [moving, setMoving] = useState<string|null>(null);
   const [r, setR] = useState({ description:"",amount:"",date:"",category:"FAHRT",fromStation:"",toStation:"",isHandyticket:false });
+  const [uploadFile, setUploadFile] = useState<File|null>(null);
   const [editData, setEditData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState("");
@@ -41,8 +42,14 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   useEffect(() => { load(); }, [id]);
 
   const addReceipt = async () => {
-    await fetch("/api/receipts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...r,tripId:id,amount:parseFloat(r.amount)})});
-    setR({description:"",amount:"",date:"",category:"FAHRT",fromStation:"",toStation:"",isHandyticket:false}); setAdding(false); load();
+    let fileName=null,filePath=null;
+    if(uploadFile){
+      const fd=new FormData();fd.append("file",uploadFile);fd.append("type","receipt");fd.append("id","temp");
+      const upRes=await fetch("/api/upload",{method:"POST",body:fd});
+      if(upRes.ok){const d=await upRes.json();fileName=d.fileName;filePath=d.filePath}
+    }
+    await fetch("/api/receipts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...r,tripId:id,amount:parseFloat(r.amount),fileName,filePath})});
+    setR({description:"",amount:"",date:"",category:"FAHRT",fromStation:"",toStation:"",isHandyticket:false}); setUploadFile(null); setAdding(false); load();
   };
   const saveEdit = async (rid:string) => {
     await fetch("/api/receipts",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:rid,...editData})});
@@ -230,6 +237,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
               </>}
             </div>
             <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
+            <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:uploadFile?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6,alignItems:"center"}}>{uploadFile?`📎 ${uploadFile.name}`:"📤 Beleg hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={e=>setUploadFile(e.target.files?.[0]||null)}/></label>
               <button onClick={()=>setAdding(false)} style={{padding:"8px 18px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Abbrechen</button>
               <button onClick={addReceipt} disabled={!r.amount||!r.date} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",opacity:(!r.amount||!r.date)?0.5:1}}>Speichern</button>
             </div>
