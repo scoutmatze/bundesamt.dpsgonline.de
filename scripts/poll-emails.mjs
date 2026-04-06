@@ -81,6 +81,16 @@ async function pollEmails() {
             }
           }
 
+          const isDbTicket = orderNr || /^(Ticket_|DB_Kaufbeleg)/i.test(safe);
+          if (!isDbTicket) {
+            // Non-DB attachment → Inbox
+            let preview="";
+            try{const {execSync:ex}=await import("child_process");preview=ex(`python3 -c "import pdfplumber\nwith pdfplumber.open('${fp}') as pdf:\n  for p in pdf.pages[:1]:\n    t=p.extract_text()\n    if t: print(t[:500])"`,{timeout:10000}).toString().trim()}catch{}
+            const iid="in"+randomBytes(12).toString("hex");
+            await pool.query('INSERT INTO "InboxItem"(id,"userId","fileName","filePath","mimeType","fileSize","subject","preview",status,"createdAt")VALUES($1,$2,$3,$4,$5,$6,$7,$8,\'NEW\',$9)',[iid,u.id,safe,fp,att.contentType,att.size,parsed.subject||null,preview||null,new Date()]);
+            console.log("  → Inbox: "+safe);
+            continue;
+          }
           const tripId = await findOrCreateTrip(u.id, dt, parsed.subject || "Reise");
           const rid="c"+randomBytes(12).toString("hex");
           const desc = orderNr ? `DB #${orderNr}: ${fromS||"?"} → ${toS||"?"}` : `Per E-Mail: ${(parsed.subject||att.filename).substring(0,80)}`;

@@ -73,6 +73,7 @@ model User {
   sachkosten      Sachkosten[]
   bewirtungen     Bewirtung[]
   bahncards       BahnCard[]
+  inbox         InboxItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -239,4 +240,20 @@ model BahnCard {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   @@unique([userId, year])
+}
+
+model InboxItem {
+  id           String   @id
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName     String
+  filePath     String
+  mimeType     String?
+  fileSize     Int?
+  subject      String?
+  preview      String?
+  assignedTo   String?
+  assignedType String?
+  status       String   @default("NEW")
+  createdAt    DateTime @default(now())
 }
