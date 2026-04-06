@@ -18,6 +18,7 @@ export default function ProfilPage() {
   const [saved, setSaved] = useState(false);
   const [sigUrl, setSigUrl] = useState<string|null>(null);
   const [sigUploading, setSigUploading] = useState(false);
+  const [sigMode, setSigMode] = useState<"upload"|"canvas">("upload");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,6 +39,10 @@ export default function ProfilPage() {
     setSigUploading(false);
   };
   const deleteSig = async () => { await fetch("/api/signature", { method:"DELETE" }); setSigUrl(null); };
+  const saveCanvasSig = async (dataUrl:string) => {
+    const res = await fetch("/api/signature-data", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({dataUrl}) });
+    if(res.ok) setSigUrl(dataUrl);
+  };
   const up = (k:string,v:string) => setP(prev=>({...prev,[k]:v}));
   const inp = (l:string,k:string,extra?:any) => (
     <div><label style={S.label}>{l}</label>
@@ -67,29 +72,38 @@ export default function ProfilPage() {
           {inp("IBAN","iban",{ style:{ fontFamily:"monospace", letterSpacing:1.5 }})}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
             {inp("BIC","bic",{ style:{ fontFamily:"monospace" }})}{inp("Bank","bank")}
-          </div>
-        </div>
-      </div>
-
-      <div style={S.card}>
         <h3 style={S.h3}>Unterschrift</h3>
-        <p style={{ fontSize:13, color:"#7a756c", margin:"0 0 16px" }}>Wird automatisch in die Reisekostenabrechnung eingesetzt.</p>
+        <p style={{ fontSize:13, color:"#7a756c", margin:"0 0 12px" }}>Wird automatisch in die Reisekostenabrechnung eingesetzt.</p>
         {sigUrl ? (
           <div>
             <div style={{ background:"#f5f3ef", borderRadius:10, padding:20, textAlign:"center", marginBottom:12 }}>
               <img src={sigUrl} alt="Unterschrift" style={{ maxWidth:"100%", maxHeight:120 }} />
             </div>
             <div style={{ display:"flex", gap:8 }}>
-              <button onClick={()=>fileRef.current?.click()} style={S.btnSecondary}>Ersetzen</button>
+              <button onClick={()=>{setSigUrl(null);setSigMode("canvas")}} style={S.btnSecondary}>Neu zeichnen</button>
+              <button onClick={()=>{setSigUrl(null);setSigMode("upload")}} style={S.btnSecondary}>Andere hochladen</button>
               <button onClick={deleteSig} style={S.btnDanger}>Löschen</button>
             </div>
           </div>
         ) : (
           <div>
-            <button onClick={()=>fileRef.current?.click()} disabled={sigUploading}
-              style={{ padding:"12px 20px", borderRadius:8, border:"1.5px dashed #003056", background:"#00305608", color:"#003056", fontSize:14, fontWeight:700, cursor:"pointer", width:"100%" }}>
-              {sigUploading ? "Wird hochgeladen..." : "Unterschrift hochladen"}
-            </button>
+            <div style={{ display:"flex", gap:8, marginBottom:12 }}>
+              <button onClick={()=>setSigMode("canvas")} style={{...S.btnSecondary, background:sigMode==="canvas"?"#00305610":"#fff", borderColor:sigMode==="canvas"?"#003056":"#d4d0c8", fontWeight:sigMode==="canvas"?700:400}}>✏️ Zeichnen</button>
+              <button onClick={()=>setSigMode("upload")} style={{...S.btnSecondary, background:sigMode==="upload"?"#00305610":"#fff", borderColor:sigMode==="upload"?"#003056":"#d4d0c8", fontWeight:sigMode==="upload"?700:400}}>📤 Hochladen</button>
+            </div>
+            {sigMode==="canvas" ? (
+              <SignaturePad onSave={saveCanvasSig} />
+            ) : (
+              <div>
+                <button onClick={()=>fileRef.current?.click()} disabled={sigUploading}
+                  style={{ padding:"12px 20px", borderRadius:8, border:"1.5px dashed #003056", background:"#00305608", color:"#003056", fontSize:14, fontWeight:700, cursor:"pointer", width:"100%" }}>
+                  {sigUploading ? "Wird hochgeladen..." : "Unterschrift hochladen"}
+                </button>
+                <p style={{ fontSize:12, color:"#9e9a92", margin:"8px 0 0" }}>PNG, JPG oder WebP · Max 5 MB</p>
+              </div>
+            )}
+          </div>
+        )}
             <p style={{ fontSize:12, color:"#9e9a92", margin:"8px 0 0" }}>PNG, JPG oder WebP · Max 5 MB</p>
           </div>
         )}

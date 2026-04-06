@@ -27,6 +27,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const [moving, setMoving] = useState<string|null>(null);
   const [r, setR] = useState({ description:"",amount:"",date:"",category:"FAHRT",fromStation:"",toStation:"",isHandyticket:false });
   const [uploadFile, setUploadFile] = useState<File|null>(null);
+  const [previewData, setPreviewData] = useState<{text?:string;url?:string;fileName?:string}|null>(null);
   const [editData, setEditData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState("");
@@ -69,6 +70,10 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
     const totalKm=legs.reduce((s,l)=>s+l.km,0);
     await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,kmLegs:JSON.stringify(legs),kmTotal:totalKm,kmAmount:totalKm*0.20})});
   };
+  const showPreview = async (filePath:string) => {
+    const res = await fetch(`/api/preview?path=${encodeURIComponent(filePath)}`);
+    if(res.ok) setPreviewData(await res.json());
+  };
   const lookupKm = async (idx:number) => {
     const leg=kmLegs[idx]; if(!leg.from||!leg.to)return;
     setKmLoading(idx);
@@ -93,6 +98,18 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   if(loading) return <div style={{padding:40,textAlign:"center",color:"#9e9a92"}}>Lade...</div>;
   if(!trip) return <div style={{padding:40,textAlign:"center"}}>Reise nicht gefunden</div>;
 
+  const previewModal = previewData ? (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setPreviewData(null)}>
+      <div style={{background:"#fff",borderRadius:12,padding:24,maxWidth:600,maxHeight:"80vh",overflow:"auto",width:"100%"}} onClick={(e:any)=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <h3 style={{fontSize:16,fontWeight:700,color:"#003056",margin:0}}>📄 {previewData.fileName}</h3>
+          <button onClick={()=>setPreviewData(null)} style={{border:"none",background:"none",fontSize:20,cursor:"pointer",color:"#9e9a92"}}>✕</button>
+        </div>
+        {previewData.text && <pre style={{fontSize:12,color:"#1a1815",background:"#f5f3ef",padding:16,borderRadius:8,whiteSpace:"pre-wrap",wordBreak:"break-word",maxHeight:400,overflow:"auto"}}>{previewData.text}</pre>}
+        {previewData.url && <img src={previewData.url} style={{maxWidth:"100%",borderRadius:8}} alt="Beleg"/>}
+      </div>
+    </div>
+  ) : null;
   const receipts=trip.receipts||[];
   const byC=(c:string)=>receipts.filter((r:any)=>r.category===c).reduce((s:number,r:any)=>s+r.amount,0);
   const total=receipts.reduce((s:number,r:any)=>s+r.amount,0);
@@ -101,6 +118,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
 
   return (
     <div>
+      {previewModal}
       <button onClick={()=>router.push("/reisen")} style={{border:"none",background:"none",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer",padding:0}}>← Zurück</button>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginTop:8,marginBottom:20,gap:12,flexWrap:"wrap"}}>
         <div>
@@ -226,7 +244,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
                 {rc.description?.startsWith("DB #")&&<Badge color="blue">🚂 DB</Badge>}
                 {rc.amount===0&&<Badge color="amber">⚠️ Betrag fehlt</Badge>}
               </div>
-              <div style={{fontSize:12,color:"#9e9a92"}}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}{rc.fileName?` · 📎 ${rc.fileName}`:""}</div>
+              <div style={{fontSize:12,color:"#9e9a92"}}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}{rc.fileName?` · `:""}}{rc.fileName&&rc.filePath?<span onClick={(e:any)=>{e.stopPropagation();showPreview(rc.filePath)}} style={{color:"#003056",cursor:"pointer",textDecoration:"underline"}}>📎 {rc.fileName}</span>:null}</div>
             </div>
             <div style={{fontWeight:700,fontSize:15,color:rc.amount===0?"#f59e0b":"#003056"}}>{rc.amount===0?"—":fmt(rc.amount)}</div>
             <button onClick={()=>{setMoving(rc.id);setEditing(null)}} title="Verschieben" style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:18,padding:"8px"}}>↗️</button>
