@@ -60,6 +60,7 @@ model User {
   ibanEncrypted String?   @db.Text // AES-256-GCM encrypted
   bic           String?
   bank          String?
+  gremium       String?
   accountHolder String?
   signaturePath String?   // Path in MinIO
   signatureData   String?   // Canvas-Signatur als Data URL

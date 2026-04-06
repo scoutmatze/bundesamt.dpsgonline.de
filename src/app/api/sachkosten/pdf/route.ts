@@ -80,8 +80,8 @@ w.write('${mergedFile}')
   }
 }
 
-function pdfResponse(data: Buffer, filename: string) {
-  return new NextResponse(data, {
+function pdfResponse(data: Buffer | Uint8Array | Uint8Array, filename: string) {
+  return new NextResponse(new Uint8Array(data), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${filename}"`,
