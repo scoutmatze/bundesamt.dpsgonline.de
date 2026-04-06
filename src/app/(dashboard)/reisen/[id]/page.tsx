@@ -29,11 +29,13 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const [editData, setEditData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState("");
+  const [kmLegs, setKmLegs] = useState<{from:string;to:string;km:number}[]>([]);
+  const [kmLoading, setKmLoading] = useState<number|null>(null);
 
   const load = async () => {
     const res = await fetch("/api/trips"); const trips = await res.json();
     setAllTrips(trips);
-    const found=trips.find((t:any)=>t.id===id)||null;setTrip(found);if(found)setNotes(found.notes||"");
+    const found=trips.find((t:any)=>t.id===id)||null;setTrip(found);if(found){setNotes(found.notes||"");try{setKmLegs(JSON.parse(found.kmLegs||"[]"))}catch{setKmLegs([])}}
     setLoading(false);
   };
   useEffect(() => { load(); }, [id]);
@@ -56,6 +58,19 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   };
   const delReceipt = async (rid:string) => { await fetch("/api/receipts",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:rid,tripId:id})}); load(); };
   const saveNotes = async (val:string) => { await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,notes:val})}); };
+  const saveKm = async (legs:{from:string;to:string;km:number}[]) => {
+    const totalKm=legs.reduce((s,l)=>s+l.km,0);
+    await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,kmLegs:JSON.stringify(legs),kmTotal:totalKm,kmAmount:totalKm*0.20})});
+  };
+  const lookupKm = async (idx:number) => {
+    const leg=kmLegs[idx]; if(!leg.from||!leg.to)return;
+    setKmLoading(idx);
+    try{
+      const res=await fetch(`/api/distance?from=${encodeURIComponent(leg.from)}&to=${encodeURIComponent(leg.to)}`);
+      if(res.ok){const d=await res.json();const n=[...kmLegs];n[idx]={...n[idx],km:d.km};setKmLegs(n);saveKm(n)}
+      else alert("Route nicht gefunden")
+    }catch{alert("Fehler")}finally{setKmLoading(null)}
+  };
   const delTrip = async () => { if(!confirm("Reise wirklich löschen?"))return; await fetch("/api/trips",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); router.push("/reisen"); };
   const downloadPdf = async () => {
     const res=await fetch(`/api/pdf?tripId=${id}`);
@@ -83,7 +98,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginTop:8,marginBottom:20,gap:12,flexWrap:"wrap"}}>
         <div>
           <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0,cursor:"pointer"}} onClick={()=>{const n=prompt("Reisezweck umbenennen:",trip.purpose);if(n&&n!==trip.purpose)fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,purpose:n})}).then(()=>load())}}>{trip.purpose} <span style={{fontSize:14,color:"#9e9a92",fontWeight:400}}>✏️</span></h1>
-          <p style={{fontSize:14,color:"#7a756c",margin:"4px 0 0"}}>{trip.travelMode==="PRIVAT_PKW"?"🚗":"🚂"} {trip.route||"—"} · {new Date(trip.startDate).toLocaleDateString("de-DE")}</p>
+          <p style={{fontSize:14,color:"#7a756c",margin:"4px 0 0"}}>{trip.travelMode==="PRIVAT_PKW"?"🚗":trip.travelMode==="MIETWAGEN"?"🚙":"🚂"} {trip.route||"—"} · {new Date(trip.startDate).toLocaleDateString("de-DE")}</p>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={delTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Löschen</button>
@@ -103,6 +118,29 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
       </div>
 
       <div style={{background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid #d4d0c8",marginBottom:16}}>
+      {(trip.travelMode==="PRIVAT_PKW"||trip.travelMode==="MIETWAGEN") && (
+      <div style={{background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid #d4d0c8",marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <label style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6}}>
+            {trip.travelMode==="PRIVAT_PKW"?"Kilometerabrechnung (0,20 €/km)":"Fahrtstrecken (Mietwagen)"}
+          </label>
+          <span style={{fontWeight:700,fontSize:16,color:"#003056"}}>
+            {trip.travelMode==="PRIVAT_PKW"?`${kmLegs.reduce((s:number,l:any)=>s+l.km,0)} km · ${(kmLegs.reduce((s:number,l:any)=>s+l.km,0)*0.20).toFixed(2).replace(".",",")} €`:`${kmLegs.reduce((s:number,l:any)=>s+l.km,0)} km`}
+          </span>
+        </div>
+        {kmLegs.map((leg:any,i:number)=>(
+          <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 70px auto auto",gap:8,marginBottom:8,alignItems:"end"}}>
+            <div><label style={{fontSize:11,fontWeight:600,color:"#5c5850",display:"block",marginBottom:3}}>VON</label><input value={leg.from} onChange={e=>{const n=[...kmLegs];n[i]={...n[i],from:e.target.value};setKmLegs(n)}} onBlur={()=>saveKm(kmLegs)} placeholder="z.B. Mönchengladbach" style={{width:"100%",padding:"7px 10px",border:"1.5px solid #d4d0c8",borderRadius:6,fontSize:13,outline:"none",boxSizing:"border-box"}}/></div>
+            <div><label style={{fontSize:11,fontWeight:600,color:"#5c5850",display:"block",marginBottom:3}}>NACH</label><input value={leg.to} onChange={e=>{const n=[...kmLegs];n[i]={...n[i],to:e.target.value};setKmLegs(n)}} onBlur={()=>saveKm(kmLegs)} placeholder="z.B. Neuss" style={{width:"100%",padding:"7px 10px",border:"1.5px solid #d4d0c8",borderRadius:6,fontSize:13,outline:"none",boxSizing:"border-box"}}/></div>
+            <div><label style={{fontSize:11,fontWeight:600,color:"#5c5850",display:"block",marginBottom:3}}>KM</label><input type="number" value={leg.km||""} onChange={e=>{const n=[...kmLegs];n[i]={...n[i],km:parseInt(e.target.value)||0};setKmLegs(n)}} onBlur={()=>saveKm(kmLegs)} style={{width:"100%",padding:"7px 10px",border:"1.5px solid #d4d0c8",borderRadius:6,fontSize:13,outline:"none",textAlign:"right"}}/></div>
+            <button onClick={()=>lookupKm(i)} disabled={!leg.from||!leg.to||kmLoading!==null} title="Entfernung berechnen (OpenStreetMap)" style={{padding:"7px 10px",borderRadius:6,border:"1px solid #d4d0c8",background:kmLoading===i?"#dbeafe":"#fff",color:"#003056",fontSize:13,cursor:"pointer"}}>{kmLoading===i?"⏳":"📍"}</button>
+            <button onClick={()=>{const n=kmLegs.filter((_:any,j:number)=>j!==i);setKmLegs(n);saveKm(n)}} style={{border:"none",background:"none",color:"#9e9a92",fontSize:16,cursor:"pointer",padding:"8px"}}>✕</button>
+          </div>
+        ))}
+        <button onClick={()=>{setKmLegs([...kmLegs,{from:"",to:"",km:0}])}} style={{padding:"6px 14px",borderRadius:6,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Strecke hinzufügen</button>
+        <p style={{fontSize:11,color:"#9e9a92",marginTop:8,marginBottom:0}}>📍 = Entfernung per OpenStreetMap berechnen (DSGVO-konform). Alternativ manuell eingeben.</p>
+      </div>)}
+
         <label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>Hinweise für Buchhaltung / Kassenprüfung</label>
         <textarea value={notes} onChange={e=>{setNotes(e.target.value)}} onBlur={e=>saveNotes(e.target.value)} placeholder="z.B. Zwei Reservierungen, weil eine für Person X damit wir zusammensitzen..." rows={3} style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit"}}/>
       </div>
