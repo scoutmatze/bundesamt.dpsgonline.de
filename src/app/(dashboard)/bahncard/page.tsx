@@ -115,7 +115,6 @@ export default function BahnCardPage() {
           <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:form.receiptFileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6}}>{form.receiptFileName?"📎 "+form.receiptFileName:"📤 Rechnung hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={async e=>{if(!e.target.files?.[0]||!editing)return;const fd=new FormData();fd.append("file",e.target.files[0]);fd.append("type","bahncard-receipt");fd.append("id",editing);const res=await fetch("/api/upload",{method:"POST",body:fd});if(res.ok){const d=await res.json();up("receiptFileName",d.fileName);load()}else alert("Upload fehlgeschlagen")}}/></label>
         </div>
         </div>
-        </div>
         <div><label style={S.label}>Hinweise</label><textarea value={form.notes||""} onChange={e=>up("notes",e.target.value)} rows={2} placeholder="Optional" style={{...S.input,resize:"vertical",fontFamily:"inherit"}}/></div>
       </div>
       <div style={{display:"flex",gap:8,marginTop:14,justifyContent:"flex-end"}}>
