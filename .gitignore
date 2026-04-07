@@ -37,3 +37,9 @@ generated/
 __pycache__/
 *.pyc
 .venv/
+deploy-paket/
+upgrades/
+block-a/
+block-b/
+tomorrow/
+*.tar.gz
