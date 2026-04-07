@@ -191,6 +191,24 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         <p style={{fontSize:11,color:"#9e9a92",margin:"6px 0 0"}}>Anreisetag: 14 € · Ganzer Tag: 28 € · Abreisetag: 14 € — Kürzungen bei gestellten Mahlzeiten nicht berücksichtigt</p>
       </div>)}
 
+      <div style={{background:"#fff",borderRadius:12,padding:"16px 20px",border:"1px solid #d4d0c8",marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <label style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6}}>🌱 CO₂-Fußabdruck</label>
+          <span style={{fontWeight:700,fontSize:16,color:trip.travelMode==="BAHN"?"#2D6A4F":"#b45309"}}>{(()=>{
+            const factors:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154,DIENSTWAGEN:154,FLUGZEUG:214};
+            const f=factors[trip.travelMode]||0;
+            let km=0;
+            if(trip.kmLegs){try{km=JSON.parse(trip.kmLegs).reduce((s:number,l:any)=>s+l.km,0)}catch{}}
+            if(!km&&trip.travelMode==="BAHN"){const fahrten=receipts.filter((r:any)=>r.category==="FAHRT"&&r.fromStation&&r.toStation);km=fahrten.length*300}
+            const co2=Math.round(f*km/100)/10;
+            return co2>0?co2.toFixed(1)+" kg CO₂":"—";
+          })()}</span>
+        </div>
+        <div style={{fontSize:11,color:"#9e9a92",marginTop:6}}>
+          {trip.travelMode==="BAHN"?"🚂 Bahn: 32 g/km — umweltfreundlichste Wahl":"🚗 PKW: 154 g/km"}
+          {trip.travelMode==="BAHN"?" · Bis zu 80% weniger CO₂ als PKW":""}
+        </div>
+      </div>
         <label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginBottom:8}}>Hinweise für Buchhaltung / Kassenprüfung</label>
         <textarea value={notes} onChange={e=>{setNotes(e.target.value)}} onBlur={e=>saveNotes(e.target.value)} placeholder="z.B. Zwei Reservierungen, weil eine für Person X damit wir zusammensitzen..." rows={3} style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit"}}/>
       </div>

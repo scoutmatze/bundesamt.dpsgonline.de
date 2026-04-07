@@ -6,6 +6,8 @@ interface Stats {
   trips: { total: number; draft: number; pending: number; totalAmount: number };
   sachkosten: { total: number; totalAmount: number };
   bewirtung: { total: number; totalAmount: number };
+  co2: { totalKg: tripsArr.reduce((sum: number, t: any) => { const f:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154};let km=0;try{km=JSON.parse(t.kmLegs||"[]").reduce((s:number,l:any)=>s+l.km,0)}catch{};if(!km&&t.travelMode==="BAHN")km=(t.receipts||[]).filter((r:any)=>r.category==="FAHRT"&&r.fromStation).length*300;return sum+Math.round((f[t.travelMode]||0)*km/100)/10},0) },
+        co2: { totalKg: number };
   bahncard: { total: number; totalCost: number };
 }
 
@@ -41,6 +43,7 @@ export default function DashboardPage() {
           total: bwArr.length,
           totalAmount: bwArr.reduce((sum: number, b: any) => sum + (b.amountTotal || 0), 0),
         },
+        co2: { totalKg: tripsArr.reduce((sum: number, t: any) => { const f:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154};let km=0;try{km=JSON.parse(t.kmLegs||"[]").reduce((s:number,l:any)=>s+l.km,0)}catch{};if(!km&&t.travelMode==="BAHN")km=(t.receipts||[]).filter((r:any)=>r.category==="FAHRT"&&r.fromStation).length*300;return sum+Math.round((f[t.travelMode]||0)*km/100)/10},0) },
         bahncard: {
           total: bcArr.length,
           totalCost: bcArr.reduce((sum: number, b: any) => sum + (b.cost || 0), 0),
@@ -60,6 +63,7 @@ export default function DashboardPage() {
     { href: "/sachkosten", icon: "📋", label: "Sachkosten", count: stats?.sachkosten.total || 0, amount: stats?.sachkosten.totalAmount || 0, badge: null, badgeColor: "" },
     { href: "/bewirtung", icon: "🍽", label: "Bewirtung", count: stats?.bewirtung.total || 0, amount: stats?.bewirtung.totalAmount || 0, badge: null, badgeColor: "" },
     { href: "/bahncard", icon: "🎫", label: "BahnCard", count: stats?.bahncard.total || 0, amount: stats?.bahncard.totalCost || 0, badge: null, badgeColor: "" },
+    { href: "/reisen", icon: "🌱", label: "CO₂-Bilanz", count: 0, amount: stats?.co2.totalKg || 0, badge: null, badgeColor: "" },
   ];
 
   return (
