@@ -63,13 +63,15 @@ export async function PUT(req: NextRequest) {
     where: { id: data.id },
     data: {
       purpose: data.purpose ?? trip.purpose,
-      route: data.route ?? trip.route,
+      route: data.route ?? (data.kmLegs ? undefined : trip.route),
       notes: data.notes ?? trip.notes,
       kmLegs: data.kmLegs ?? trip.kmLegs,
       kmTotal: data.kmTotal ?? trip.kmTotal,
       kmAmount: data.kmAmount ?? trip.kmAmount,
       startDate: data.startDate ? new Date(data.startDate) : trip.startDate,
       endDate: data.endDate ? new Date(data.endDate) : trip.endDate,
+      startTime: data.startTime ?? trip.startTime,
+      endTime: data.endTime ?? trip.endTime,
     },
   });
   return NextResponse.json(updated);
