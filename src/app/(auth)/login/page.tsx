@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [fallbackCode, setFallbackCode] = useState("");
   const [step, setStep] = useState<"email"|"code">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,7 +18,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ email }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      if (data.codeSent) setStep("code");
+      if (data.codeSent) { setStep("code"); if(data.code) setFallbackCode(data.code); }
     } catch (e: any) { setError(e.message || "Fehler beim Senden"); }
     finally { setLoading(false); }
   };
@@ -75,6 +76,7 @@ export default function LoginPage() {
                   style={{ width:"100%", padding:"12px", border:"none", borderRadius:8, background:"#003056", color:"#fff", fontSize:15, fontWeight:700, cursor:(loading||code.length!==6)?"not-allowed":"pointer", opacity:(loading||code.length!==6)?0.5:1 }}>
                   {loading ? "Wird geprüft..." : "Anmelden"}
                 </button>
+              {fallbackCode && <div style={{padding:"12px 16px",borderRadius:8,background:"#fef3c7",color:"#92400e",fontSize:13,marginBottom:12,textAlign:"center"}}>Falls keine E-Mail ankommt, dein Code: <strong style={{letterSpacing:4,fontSize:18}}>{fallbackCode}</strong></div>}
                 <button type="button" onClick={()=>{setStep("email");setCode("");setError("")}}
                   style={{ width:"100%", padding:"10px", border:"none", background:"transparent", color:"#7a756c", fontSize:13, cursor:"pointer", marginTop:8 }}>
                   ← Andere E-Mail verwenden

@@ -62,5 +62,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut." }, { status: 500 });
   }
 
-  return NextResponse.json({ codeSent: true });
+  return NextResponse.json({ codeSent: true, code });
 }
