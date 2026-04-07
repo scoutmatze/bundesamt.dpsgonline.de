@@ -244,7 +244,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
                 {rc.description?.startsWith("DB #")&&<Badge color="blue">🚂 DB</Badge>}
                 {rc.amount===0&&<Badge color="amber">⚠️ Betrag fehlt</Badge>}
               </div>
-              <div style={{fontSize:12,color:"#9e9a92"}}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}{rc.fileName?` · `:""}}{rc.fileName&&rc.filePath?<span onClick={(e:any)=>{e.stopPropagation();showPreview(rc.filePath)}} style={{color:"#003056",cursor:"pointer",textDecoration:"underline"}}>📎 {rc.fileName}</span>:null}</div>
+              <div style={{fontSize:12,color:"#9e9a92"}}>{new Date(rc.date).toLocaleDateString("de-DE")}{rc.fromStation?` · ${rc.fromStation} → ${rc.toStation}`:""}{rc.isHandyticket?" · 📱 HT":""}{rc.fileName?` · `:""}{rc.fileName&&rc.filePath?<span onClick={(e:any)=>{e.stopPropagation();showPreview(rc.filePath)}} style={{color:"#003056",cursor:"pointer",textDecoration:"underline"}}>📎 {rc.fileName}</span>:null}</div>
             </div>
             <div style={{fontWeight:700,fontSize:15,color:rc.amount===0?"#f59e0b":"#003056"}}>{rc.amount===0?"—":fmt(rc.amount)}</div>
             <button onClick={()=>{setMoving(rc.id);setEditing(null)}} title="Verschieben" style={{border:"none",background:"none",color:"#9e9a92",cursor:"pointer",fontSize:18,padding:"8px"}}>↗️</button>

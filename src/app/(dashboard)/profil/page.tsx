@@ -104,9 +104,6 @@ export default function ProfilPage() {
             )}
           </div>
         )}
-            <p style={{ fontSize:12, color:"#9e9a92", margin:"8px 0 0" }}>PNG, JPG oder WebP · Max 5 MB</p>
-          </div>
-        )}
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadSig} style={{ display:"none" }} />
       </div>
 
