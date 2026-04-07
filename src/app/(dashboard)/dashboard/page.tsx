@@ -84,7 +84,7 @@ export default function DashboardPage() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <span style={{ fontSize: 28 }}>{c.icon}</span>
-                <span style={{ fontSize: 22, fontWeight: 700, color: "#003056" }}>{c.count}</span>
+                <span style={{ fontSize: 22, fontWeight: 700, color: "#003056" }}>{c.label==="CO₂-Bilanz"?"":c.count}</span>
               </div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#003056", marginTop: 8 }}>{c.label}</div>
               <div style={{ fontSize: 13, color: "#7a756c", marginTop: 2 }}>{c.label==="CO₂-Bilanz"?(c.amount>0?c.amount.toFixed(1)+" kg CO₂":"0 kg CO₂"):fmt(c.amount)}</div>
