@@ -1,4 +1,5 @@
 "use client";
+import HelpBox from "@/components/HelpBox";
 import { useState, useEffect } from "react";
 
 const S = {
@@ -73,6 +74,11 @@ export default function SachkostenPage() {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
         <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0}}>Sachkostenabrechnungen</h1>
         <button onClick={()=>setAdding(true)} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Neue Abrechnung</button>
+      </div>
+      <HelpBox title="So funktioniert es">
+        <p><strong>Pro Quartal</strong> eine Abrechnung für Telefon, Porto, Büromaterial etc.</p>
+        <p>Positionen hinzufügen → Beleg pro Position hochladen → 📄 PDF erstellen → per Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
+      </HelpBox>
       </div>
 
       {adding && (

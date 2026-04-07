@@ -1,4 +1,5 @@
 "use client";
+import HelpBox from "@/components/HelpBox";
 import { useState, useEffect } from "react";
 
 const S = {
@@ -59,6 +60,10 @@ export default function PosteingangPage() {
           <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0}}>Posteingang</h1>
           <p style={{fontSize:13,color:"#7a756c",margin:"4px 0 0"}}>Belege per E-Mail an die App senden und hier zuweisen</p>
         </div>
+      </div>
+      <HelpBox title="So funktioniert es">
+        <p>Leite Rechnungen, Quittungen oder Belege per E-Mail an <strong>belege_reisekosten@bundesamt.dpsgonline.de</strong> weiter. Nicht-DB-Belege landen hier. Klicke <strong>„Zuweisen"</strong> um sie einer Reise, Sachkostenabrechnung oder Bewirtung zuzuordnen. Mit 👁 kannst du eine Vorschau ansehen.</p>
+      </HelpBox>
       </div>
 
       {/* Preview Modal */}

@@ -1,4 +1,5 @@
 "use client";
+import HelpBox from "@/components/HelpBox";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
@@ -15,6 +16,13 @@ export default function ReisenPage() {
         <div>
           <h1 style={{ fontSize:24, fontWeight:700, color:"#003056", margin:0 }}>Meine Reisen</h1>
           <p style={{ fontSize:14, color:"#7a756c", margin:"4px 0 0" }}>Erstelle und verwalte deine Reisekostenabrechnungen.</p>
+        <p style={{fontSize:13,color:"#7a756c",margin:"4px 0 0"}}>Erstelle und verwalte deine Reisekostenabrechnungen.</p>
+      </div>
+      <HelpBox title="So funktioniert es">
+        <p><strong>Reise anlegen:</strong> Klicke „+ Neue Reise", gib Reisezweck, Datum und Reisemittel ein.</p>
+        <p><strong>Belege hinzufügen:</strong> DB-Tickets per E-Mail an <strong>belege_reisekosten@bundesamt.dpsgonline.de</strong> weiterleiten — sie werden automatisch erkannt. Oder manuell in der Reise hochladen.</p>
+        <p><strong>PDF erstellen:</strong> In der Reise „PDF-Paket erstellen" klicken → PDF per E-Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
+      </HelpBox>
         </div>
         <Link href="/reisen/neu" style={{ padding:"10px 20px", borderRadius:8, background:"#8b0a1e", color:"#fff", textDecoration:"none", fontWeight:700, fontSize:14 }}>
           + Neue Reise

@@ -1,4 +1,5 @@
 "use client";
+import HelpBox from "@/components/HelpBox";
 import { useState, useEffect } from "react";
 
 const S = {
@@ -106,6 +107,10 @@ export default function BahnCardPage() {
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
         <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0}}>BahnCard-Anträge</h1>
         <button onClick={()=>{setAdding(true);setEditing(null);setForm({year:new Date().getFullYear(),cardType:"BC50",class:2,cost:0,validFrom:"",validTo:"",bahnCardNr:"",justification:"",notes:""})}} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Neuer Antrag</button>
+      </div>
+      <HelpBox title="So funktioniert es">
+        <p>Einmal jährlich BahnCard beantragen: Typ, Klasse, Kosten eingeben → Begründung schreiben → Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" style={{color:"#003056",fontWeight:700}}>bcbp.db-app.de</a> berechnen und PDF hochladen → 📄 PDF erstellen → per Mail senden.</p>
+      </HelpBox>
       </div>
 
       {(adding || editing) && formUI}
