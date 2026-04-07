@@ -123,7 +123,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginTop:8,marginBottom:20,gap:12,flexWrap:"wrap"}}>
         <div>
           <h1 style={{fontSize:24,fontWeight:700,color:"#003056",margin:0,cursor:"pointer"}} onClick={()=>{const n=prompt("Reisezweck umbenennen:",trip.purpose);if(n&&n!==trip.purpose)fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,purpose:n})}).then(()=>load())}}>{trip.purpose} <span style={{fontSize:14,color:"#9e9a92",fontWeight:400}}>✏️</span></h1>
-          <p style={{fontSize:14,color:"#7a756c",margin:"4px 0 0"}}>{trip.travelMode==="PRIVAT_PKW"?"🚗":trip.travelMode==="MIETWAGEN"?"🚙":"🚂"} {trip.route||"—"} · {new Date(trip.startDate).toLocaleDateString("de-DE")}</p>
+          <p style={{fontSize:14,color:"#7a756c",margin:"4px 0 0"}}>{trip.travelMode==="PRIVAT_PKW"?"🚗":trip.travelMode==="MIETWAGEN"?"🚙":"🚂"} {trip.route||"—"} · <span style={{cursor:"pointer"}} onClick={()=>{const d=prompt("Reisedatum (YYYY-MM-DD):",trip.startDate?.split("T")[0]);if(d)fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,startDate:d})}).then(()=>load())}}>{new Date(trip.startDate).toLocaleDateString("de-DE")} ✏️</span></p>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={delTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Löschen</button>
