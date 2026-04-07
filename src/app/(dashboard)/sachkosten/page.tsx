@@ -79,7 +79,6 @@ export default function SachkostenPage() {
         <p><strong>Pro Quartal</strong> eine Abrechnung für Telefon, Porto, Büromaterial etc.</p>
         <p>Positionen hinzufügen → Beleg pro Position hochladen → 📄 PDF erstellen → per Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
       </HelpBox>
-      </div>
 
       {adding && (
         <div style={{background:"#fff",borderRadius:12,padding:20,border:"1px solid #d4d0c8",marginBottom:16}}>

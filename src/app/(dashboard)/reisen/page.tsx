@@ -15,19 +15,16 @@ export default function ReisenPage() {
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
         <div>
           <h1 style={{ fontSize:24, fontWeight:700, color:"#003056", margin:0 }}>Meine Reisen</h1>
-          <p style={{ fontSize:14, color:"#7a756c", margin:"4px 0 0" }}>Erstelle und verwalte deine Reisekostenabrechnungen.</p>
-        <p style={{fontSize:13,color:"#7a756c",margin:"4px 0 0"}}>Erstelle und verwalte deine Reisekostenabrechnungen.</p>
-      </div>
-      <HelpBox title="So funktioniert es">
-        <p><strong>Reise anlegen:</strong> Klicke „+ Neue Reise", gib Reisezweck, Datum und Reisemittel ein.</p>
-        <p><strong>Belege hinzufügen:</strong> DB-Tickets per E-Mail an <strong>belege_reisekosten@bundesamt.dpsgonline.de</strong> weiterleiten — sie werden automatisch erkannt. Oder manuell in der Reise hochladen.</p>
-        <p><strong>PDF erstellen:</strong> In der Reise „PDF-Paket erstellen" klicken → PDF per E-Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
-      </HelpBox>
         </div>
         <Link href="/reisen/neu" style={{ padding:"10px 20px", borderRadius:8, background:"#8b0a1e", color:"#fff", textDecoration:"none", fontWeight:700, fontSize:14 }}>
           + Neue Reise
         </Link>
       </div>
+      <HelpBox title="So funktioniert es">
+        <p><strong>Reise anlegen:</strong> Klicke „+ Neue Reise", gib Reisezweck, Datum und Reisemittel ein.</p>
+        <p><strong>Belege:</strong> DB-Tickets per E-Mail an <strong>belege_reisekosten@bundesamt.dpsgonline.de</strong> weiterleiten. Oder manuell hochladen.</p>
+        <p><strong>PDF erstellen:</strong> In der Reise „PDF-Paket erstellen" → per Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
+      </HelpBox>
       {trips.length === 0 ? (
         <div style={{ background:"#fff", borderRadius:12, padding:"48px 24px", border:"1px solid #d4d0c8", textAlign:"center" }}>
           <div style={{ fontWeight:700, fontSize:16, color:"#003056" }}>Noch keine Reisen</div>

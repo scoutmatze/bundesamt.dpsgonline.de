@@ -64,7 +64,6 @@ export default function PosteingangPage() {
       <HelpBox title="So funktioniert es">
         <p>Leite Rechnungen, Quittungen oder Belege per E-Mail an <strong>belege_reisekosten@bundesamt.dpsgonline.de</strong> weiter. Nicht-DB-Belege landen hier. Klicke <strong>„Zuweisen"</strong> um sie einer Reise, Sachkostenabrechnung oder Bewirtung zuzuordnen. Mit 👁 kannst du eine Vorschau ansehen.</p>
       </HelpBox>
-      </div>
 
       {/* Preview Modal */}
       {preview && (

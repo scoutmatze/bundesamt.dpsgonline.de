@@ -111,7 +111,6 @@ export default function BahnCardPage() {
       <HelpBox title="So funktioniert es">
         <p>Einmal jährlich BahnCard beantragen: Typ, Klasse, Kosten eingeben → Begründung schreiben → Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" style={{color:"#003056",fontWeight:700}}>bcbp.db-app.de</a> berechnen und PDF hochladen → 📄 PDF erstellen → per Mail senden.</p>
       </HelpBox>
-      </div>
 
       {(adding || editing) && formUI}
 

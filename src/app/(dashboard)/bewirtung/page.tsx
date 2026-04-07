@@ -127,7 +127,6 @@ export default function BewirtungPage() {
       <HelpBox title="So funktioniert es">
         <p>Datum, Ort und Anlass eingeben → bewirtete Personen erfassen → Kosten aufschlüsseln (Speisen, Getränke, Trinkgeld) → Restaurantrechnung hochladen → 📄 PDF erstellen → per Mail an <strong>reisekosten@dpsg.de</strong> senden.</p>
       </HelpBox>
-      </div>
 
       {(adding || editing) && formUI}
 
