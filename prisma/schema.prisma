@@ -62,7 +62,6 @@ model User {
   bank          String?
   gremium       String?
   password      String?
-  password      String?
   accountHolder String?
   signaturePath String?   // Path in MinIO
   signatureData   String?   // Canvas-Signatur als Data URL

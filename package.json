@@ -20,7 +20,9 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "^2.4.6",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
