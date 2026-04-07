@@ -6,8 +6,8 @@ interface Stats {
   trips: { total: number; draft: number; pending: number; totalAmount: number };
   sachkosten: { total: number; totalAmount: number };
   bewirtung: { total: number; totalAmount: number };
-  co2: { totalKg: tripsArr.reduce((sum: number, t: any) => { const f:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154};let km=0;try{km=JSON.parse(t.kmLegs||"[]").reduce((s:number,l:any)=>s+l.km,0)}catch{};if(!km&&t.travelMode==="BAHN")km=(t.receipts||[]).filter((r:any)=>r.category==="FAHRT"&&r.fromStation).length*300;return sum+Math.round((f[t.travelMode]||0)*km/100)/10},0) },
-        co2: { totalKg: number };
+        
+  co2: { totalKg: number };
   bahncard: { total: number; totalCost: number };
 }
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           total: bwArr.length,
           totalAmount: bwArr.reduce((sum: number, b: any) => sum + (b.amountTotal || 0), 0),
         },
-        co2: { totalKg: tripsArr.reduce((sum: number, t: any) => { const f:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154};let km=0;try{km=JSON.parse(t.kmLegs||"[]").reduce((s:number,l:any)=>s+l.km,0)}catch{};if(!km&&t.travelMode==="BAHN")km=(t.receipts||[]).filter((r:any)=>r.category==="FAHRT"&&r.fromStation).length*300;return sum+Math.round((f[t.travelMode]||0)*km/100)/10},0) },
+        co2: { totalKg: tripsArr.reduce((sum: number, t: any) => { const f: any = {BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154}; let km=0; try{km=JSON.parse(t.kmLegs||"[]").reduce((s:number,l:any)=>s+l.km,0)}catch{}; if(!km&&t.travelMode==="BAHN")km=(t.receipts||[]).filter((r:any)=>r.category==="FAHRT"&&r.fromStation).length*300; return sum+Math.round((f[t.travelMode]||0)*km/100)/10; }, 0) },
         bahncard: {
           total: bcArr.length,
           totalCost: bcArr.reduce((sum: number, b: any) => sum + (b.cost || 0), 0),
@@ -87,7 +87,7 @@ export default function DashboardPage() {
                 <span style={{ fontSize: 22, fontWeight: 700, color: "#003056" }}>{c.count}</span>
               </div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#003056", marginTop: 8 }}>{c.label}</div>
-              <div style={{ fontSize: 13, color: "#7a756c", marginTop: 2 }}>{fmt(c.amount)}</div>
+              <div style={{ fontSize: 13, color: "#7a756c", marginTop: 2 }}>{c.label==="CO₂-Bilanz"?(c.amount>0?c.amount.toFixed(1)+" kg CO₂":"0 kg CO₂"):fmt(c.amount)}</div>
               {c.badge && (
                 <div style={{ marginTop: 8, padding: "3px 10px", borderRadius: 12, background: c.badgeColor, fontSize: 11, fontWeight: 700, color: "#92400e", display: "inline-block" }}>
                   ⚠️ {c.badge}
