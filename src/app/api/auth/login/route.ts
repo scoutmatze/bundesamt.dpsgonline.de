@@ -1,66 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/send-email";
+import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
 
 const ALLOWED_DOMAINS = ["@dpsg.de", "@dpsgonline.de", "@bundesamt.dpsgonline.de"];
 
-function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+  const { email, password } = await req.json();
   if (!email) return NextResponse.json({ error: "E-Mail erforderlich" }, { status: 400 });
 
   const normalized = email.toLowerCase().trim();
 
-  // Check domain
   const domainOk = ALLOWED_DOMAINS.some(d => normalized.endsWith(d));
-  if (!domainOk) return NextResponse.json({ error: "Nur @dpsg.de E-Mail-Adressen erlaubt." }, { status: 403 });
+  if (!domainOk) return NextResponse.json({ error: "Nur DPSG E-Mail-Adressen erlaubt" }, { status: 403 });
 
-  // Check if user exists (admin must pre-approve, except first user)
-  const userCount = await prisma.user.count();
-  if (userCount > 0) {
-    const user = await prisma.user.findUnique({ where: { email: normalized } });
-    if (!user) {
-      return NextResponse.json({
-        error: "Dein Account wurde noch nicht freigeschaltet. Bitte wende dich an den*die Administrator*in."
-      }, { status: 403 });
+  // Check if user exists and has password
+  const user = await prisma.user.findUnique({ where: { email: normalized } });
+
+  // ── Password Login ──
+  if (password) {
+    if (!user || !user.password) {
+      return NextResponse.json({ error: "Kein Passwort gesetzt. Bitte zuerst per Code einloggen." }, { status: 400 });
     }
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return NextResponse.json({ error: "Falsches Passwort" }, { status: 401 });
+    }
+
+    // Create session
+    const token = randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await prisma.session.create({ data: { sessionToken: token, userId: user.id, expires } });
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    cookieStore.set("dpsg-session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires,
+      path: "/",
+    });
+
+    return NextResponse.json({ ok: true, needsProfile: !user.firstName });
   }
 
-  // Generate 6-digit code
-  const code = generateCode();
-  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // ── Code Login (Fallback) ──
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const codeExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-  // Delete old codes for this email
   await prisma.loginCode.deleteMany({ where: { email: normalized } });
+  await prisma.loginCode.create({ data: { email: normalized, code, expires: codeExpires } });
 
-  // Save code
-  await prisma.loginCode.create({ data: { email: normalized, code, expires } });
-
-  // Send code via email
-  const sent = await sendEmail(
-    normalized,
-    `Dein Anmeldecode: ${code}`,
-    `
-    <div style="font-family:'PT Sans Narrow',system-ui,sans-serif;max-width:400px;margin:0 auto;padding:32px">
+  // Try to send email
+  const htmlBody = `
+    <div style="font-family:system-ui,sans-serif;max-width:400px;margin:0 auto">
       <div style="background:#003056;color:#fff;padding:20px 24px;border-radius:12px 12px 0 0;text-align:center">
-        <h1 style="margin:0;font-size:20px">DPSG Reisekosten</h1>
+        <h2 style="margin:0;font-size:20px">DPSG Reisekosten</h2>
       </div>
       <div style="background:#fff;padding:24px;border:1px solid #d4d0c8;border-top:none;border-radius:0 0 12px 12px">
-        <p style="color:#5c5850;margin:0 0 16px">Dein Anmeldecode:</p>
+        <p style="color:#5c5850;font-size:14px">Dein Anmeldecode:</p>
         <div style="background:#f5f3ef;padding:16px;border-radius:8px;text-align:center;font-size:32px;font-weight:700;letter-spacing:8px;color:#003056">${code}</div>
-        <p style="color:#9e9a92;font-size:13px;margin:16px 0 0">Der Code ist 10 Minuten gültig.</p>
+        <p style="color:#9e9a92;font-size:12px;margin-top:16px">Code ist 10 Minuten gültig. Falls du diese Anmeldung nicht angefordert hast, ignoriere diese E-Mail.</p>
       </div>
-      <p style="color:#9e9a92;font-size:12px;text-align:center;margin-top:16px">Gut Pfad! 🏕️</p>
-    </div>
-    `
-  );
+    </div>`;
 
-  if (!sent) {
-    return NextResponse.json({ error: "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut." }, { status: 500 });
-  }
+  const sent = await sendEmail(normalized, "Dein Anmeldecode: " + code, htmlBody);
 
-  return NextResponse.json({ codeSent: true, code });
+  return NextResponse.json({
+    codeSent: true,
+    code,
+    hasPassword: !!(user?.password),
+  });
 }

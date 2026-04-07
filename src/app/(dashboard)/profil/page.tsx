@@ -12,6 +12,34 @@ const S = {
   btnSecondary: { padding:"8px 16px", borderRadius:8, border:"1px solid #d4d0c8", background:"#fff", color:"#5c5850", fontSize:13, cursor:"pointer" } as const,
 };
 
+function PasswordSection() {
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [hasPw, setHasPw] = useState(false);
+  useEffect(()=>{fetch("/api/password").then(r=>r.json()).then(d=>setHasPw(d.hasPassword)).catch(()=>{})}, []);
+  const save = async () => {
+    if(pw!==pw2){setMsg("Passwörter stimmen nicht überein");return}
+    if(pw.length<6){setMsg("Mindestens 6 Zeichen");return}
+    setSaving(true);
+    const res=await fetch("/api/password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    setSaving(false);
+    if(res.ok){setMsg("✓ Passwort gespeichert");setPw("");setPw2("");setHasPw(true)}else{const d=await res.json();setMsg(d.error)}
+  };
+  return (
+    <div>
+      {hasPw && <div style={{padding:"8px 14px",borderRadius:8,background:"#d1fae5",color:"#065f46",fontSize:12,marginBottom:12}}>✓ Passwort ist gesetzt</div>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+        <div><label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",marginBottom:5,textTransform:"uppercase",letterSpacing:0.6}}>{hasPw?"Neues Passwort":"Passwort"}</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Min. 6 Zeichen" style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
+        <div><label style={{display:"block",fontSize:12,fontWeight:600,color:"#5c5850",marginBottom:5,textTransform:"uppercase",letterSpacing:0.6}}>Wiederholen</label><input type="password" value={pw2} onChange={e=>setPw2(e.target.value)} placeholder="Passwort wiederholen" style={{width:"100%",padding:"9px 12px",border:"1.5px solid #d4d0c8",borderRadius:8,fontSize:14,outline:"none",boxSizing:"border-box"}}/></div>
+      </div>
+      {msg && <div style={{padding:"8px 14px",borderRadius:8,background:msg.startsWith("✓")?"#d1fae5":"#fee2e2",color:msg.startsWith("✓")?"#065f46":"#991b1b",fontSize:12,marginBottom:10}}>{msg}</div>}
+      <button onClick={save} disabled={saving||!pw} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",opacity:(saving||!pw)?0.5:1}}>{saving?"...":"Passwort speichern"}</button>
+    </div>
+  );
+}
+
 export default function ProfilPage() {
   const [p, setP] = useState({ firstName:"", lastName:"", street:"", zipCode:"", city:"", iban:"", bic:"", bank:"", accountHolder:"", gremium:"" });
   const [saving, setSaving] = useState(false);
@@ -110,6 +138,12 @@ export default function ProfilPage() {
           </div>
         )}
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadSig} style={{ display:"none" }} />
+      </div>
+
+      <div style={S.card}>
+        <h3 style={S.h3}>Passwort</h3>
+        <p style={{ fontSize:13, color:"#7a756c", margin:"0 0 12px" }}>Setze ein persönliches Passwort für den Login ohne E-Mail-Code.</p>
+        <PasswordSection />
       </div>
 
       <div style={{ display:"flex", justifyContent:"flex-end" }}>
