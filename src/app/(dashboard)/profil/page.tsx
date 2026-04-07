@@ -72,6 +72,11 @@ export default function ProfilPage() {
           {inp("IBAN","iban",{ style:{ fontFamily:"monospace", letterSpacing:1.5 }})}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
             {inp("BIC","bic",{ style:{ fontFamily:"monospace" }})}{inp("Bank","bank")}
+            </div>
+          </div>
+        </div>
+
+        <div style={S.card}>
         <h3 style={S.h3}>Unterschrift</h3>
         <p style={{ fontSize:13, color:"#7a756c", margin:"0 0 12px" }}>Wird automatisch in die Reisekostenabrechnung eingesetzt.</p>
         {sigUrl ? (
