@@ -146,6 +146,12 @@ export default function ProfilPage() {
         <PasswordSection />
       </div>
 
+      <div style={{...S.card,borderColor:"#fca5a540"}}>
+        <h3 style={{...S.h3,color:"#991b1b"}}>Gefahrenzone</h3>
+        <p style={{fontSize:13,color:"#7a756c",margin:"0 0 12px"}}>Account und alle Daten unwiderruflich löschen. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+        <button onClick={async()=>{if(!confirm("Bist du sicher? Alle deine Daten werden unwiderruflich gelöscht."))return;if(!confirm("Wirklich? Name, Bankdaten, Reisen, Belege — alles wird entfernt."))return;const res=await fetch("/api/account",{method:"DELETE"});if(res.ok)window.location.href="/login"}} style={{...S.btnDanger,background:"#fee2e2"}}>🗑️ Account löschen</button>
+      </div>
+
       <div style={{ display:"flex", justifyContent:"flex-end" }}>
         <button onClick={save} disabled={saving} style={{...S.btnPrimary, opacity:saving?0.7:1}}>
           {saving ? "Speichert..." : "Profil speichern"}

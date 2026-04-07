@@ -35,6 +35,7 @@ export function DashboardShell({ user, children }: { user: any; children: React.
     { href:"/bahncard", label:"BahnCard" },
     { href:"/posteingang", label:"Posteingang" },
     { href:"/hilfe", label:"Hilfe" },
+    { href:"/datenschutz", label:"Datenschutz" },
     { href:"/profil", label:"Profil" },
     ...(user.role === "ADMIN" ? [{ href:"/admin", label:"Admin" }] : []),
   ];

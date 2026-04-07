@@ -102,6 +102,7 @@ export default function LoginPage() {
                     {loading ? "..." : "Account erstellen"}
                   </button>
                   <p style={{ fontSize:11, color:"#9e9a92", textAlign:"center", marginTop:10 }}>Nur DPSG E-Mail-Adressen (@dpsg.de, @dpsgonline.de)</p>
+                  <a href="/datenschutz" style={{fontSize:11,color:"#9e9a92",textDecoration:"none"}}>Datenschutzerklärung</a>
                 </div>
               )}
 
@@ -130,6 +131,7 @@ export default function LoginPage() {
               </button>
               <button onClick={()=>{setStep("email");setCode("");setError("");setFallbackCode("")}}
                 style={{ width:"100%", padding:"8px", marginTop:8, border:"none", background:"none", color:"#003056", fontSize:13, cursor:"pointer" }}>← Zurück</button>
+              <a href="/datenschutz" style={{display:"block",textAlign:"center",fontSize:11,color:"#9e9a92",marginTop:12}}>Datenschutzerklärung</a>
             </div>
           )}
         </div>
