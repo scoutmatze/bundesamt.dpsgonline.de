@@ -25,6 +25,7 @@ export default function DatenschutzPage() {
         <li>Hosting: <strong>Hetzner Cloud, Deutschland</strong> (kein Transfer in Drittländer)</li>
         <li>Verschlüsselung: HTTPS/TLS, IBAN mit AES-256, Passwörter mit bcrypt</li>
         <li>Routenberechnung: <strong>OpenStreetMap/OSRM</strong> (kein Google, DSGVO-konform)</li>
+        <li>Schriftarten: <strong>Lokal eingebunden</strong> (kein Google Fonts, keine externe Verbindung)</li>
         <li>E-Mail: Microsoft Graph API über den DPSG-M365-Tenant</li>
       </ul>
 
