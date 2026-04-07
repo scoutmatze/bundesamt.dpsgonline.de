@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
   const fmt = (n: number) => n.toFixed(2).replace(".", ",");
   const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString("de-DE") : "";
-  const cardLabels: any = { BC25: "BahnCard 25", BC50: "BahnCard 50", BC100: "BahnCard 100" };
+  const cardLabels: any = { BC25:"BahnCard 25",BC50:"BahnCard 50",BC100:"BahnCard 100",MY_BC25:"My BahnCard 25",MY_BC50:"My BahnCard 50",JUGEND_BC25:"Jugend BahnCard 25",SENIOR_BC25:"Senioren BahnCard 25",SENIOR_BC50:"Senioren BahnCard 50",BIZ_BC25:"BahnCard Business 25",BIZ_BC50:"BahnCard Business 50" };
   const cardLabel = cardLabels[bc.cardType] || bc.cardType;
 
   // Signature

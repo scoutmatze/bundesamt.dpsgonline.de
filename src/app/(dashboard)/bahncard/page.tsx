@@ -66,6 +66,8 @@ export default function BahnCardPage() {
     JUGEND_BC25: { name:"Jugend BahnCard 25 (6-18)", price2:14.90, price1:14.90 },
     SENIOR_BC25: { name:"Senioren BahnCard 25 (ab 65)", price2:40.90, price1:81.90 },
     SENIOR_BC50: { name:"Senioren BahnCard 50 (ab 65)", price2:122, price1:241, note:"Osteraktion bis 31.07.: 99,99 € (2.Kl.)" },
+    BIZ_BC25: { name:"BahnCard Business 25", price2:62.90, price1:125.90 },
+    BIZ_BC50: { name:"BahnCard Business 50", price2:244, price1:492 },
   };
   const autoPrice = (type:string, cls:number) => { const m=bcModels[type]; return m ? (cls===1?m.price1:m.price2) : 0; };
   const onModelChange = (type:string) => { up("cardType",type); up("cost",autoPrice(type, form.class||2)); };
