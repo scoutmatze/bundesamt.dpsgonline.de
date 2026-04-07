@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/send-email";
 import { randomBytes } from "crypto";
@@ -11,6 +12,7 @@ export async function POST(req: NextRequest) {
   if (!email) return NextResponse.json({ error: "E-Mail erforderlich" }, { status: 400 });
 
   const normalized = email.toLowerCase().trim();
+  if (!checkRateLimit(normalized)) return NextResponse.json({ error: "Zu viele Versuche. Bitte 15 Minuten warten." }, { status: 429 });
 
   const domainOk = ALLOWED_DOMAINS.some(d => normalized.endsWith(d));
   if (!domainOk) return NextResponse.json({ error: "Nur DPSG E-Mail-Adressen erlaubt" }, { status: 403 });

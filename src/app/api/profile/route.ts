@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest) {
       bank: data.bank,
       gremium: data.gremium,
       bic: data.bic,
-      ibanEncrypted: data.iban, // TODO: encrypt with AES-256
+      ibanEncrypted: data.iban ? (await import('@/lib/encryption')).encrypt(data.iban) : undefined,
       accountHolder: data.accountHolder,
     },
   });
