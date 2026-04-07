@@ -88,6 +88,7 @@ export default function BahnCardPage() {
         <div style={{background:"#dbeafe",borderRadius:8,padding:"12px 16px",border:"1px solid #bfdbfe"}}>
           <div style={{fontSize:13,fontWeight:700,color:"#1e40af",marginBottom:6}}>BahnCard-Ersparnis berechnen</div>
           <p style={{fontSize:12,color:"#1e40af",margin:"0 0 8px"}}>Berechne deine Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" rel="noopener" style={{color:"#1e40af",fontWeight:700}}>bcbp.db-app.de</a> und lade das Ergebnis-PDF hier hoch.</p>
+          <p style={{fontSize:12,color:"#1e40af",margin:"0 0 0"}}>BMIS-Nummer: <strong>4000663</strong></p>
         </div>
         <div style={{marginBottom:12}}>
           <label style={S.label}>Beleg / Ersparnis-PDF</label>
@@ -109,7 +110,7 @@ export default function BahnCardPage() {
         <button onClick={()=>{setAdding(true);setEditing(null);setForm({year:new Date().getFullYear(),cardType:"BC50",class:2,cost:0,validFrom:"",validTo:"",bahnCardNr:"",justification:"",notes:""})}} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Neuer Antrag</button>
       </div>
       <HelpBox title="So funktioniert es">
-        <p>Einmal jährlich BahnCard beantragen: Typ, Klasse, Kosten eingeben → Begründung schreiben → Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" style={{color:"#003056",fontWeight:700}}>bcbp.db-app.de</a> berechnen und PDF hochladen → 📄 PDF erstellen → per Mail senden.</p>
+        <p>Einmal jährlich BahnCard beantragen: Typ, Klasse, Kosten eingeben → Begründung schreiben → Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" style={{color:"#003056",fontWeight:700}}>bcbp.db-app.de</a> berechnen (BMIS-Nr: 4000663) und PDF hochladen → 📄 PDF erstellen → per Mail senden.</p>
       </HelpBox>
 
       {(adding || editing) && formUI}
