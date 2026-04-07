@@ -25,44 +25,91 @@ export async function GET(req: NextRequest) {
   if (!bc) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+  const fmt = (n: number) => n.toFixed(2).replace(".", ",");
   const fmtDate = (d: any) => d ? new Date(d).toLocaleDateString("de-DE") : "";
-  const input = {
-    name,
-    address: [user.street, `${user.zipCode || ""} ${user.city || ""}`].filter(Boolean).join(", "),
-    gremium: user.gremium || "", year: bc.year,
-    card_type: bc.cardType, class: bc.class, cost: bc.cost,
-    valid_from: fmtDate(bc.validFrom), valid_to: fmtDate(bc.validTo),
-    bahncard_nr: bc.bahnCardNr || "",
-    justification: bc.justification || "",
-    notes: bc.notes || "",
-    signature_path: user.signaturePath || null,
+  const cardLabels: any = { BC25: "BahnCard 25", BC50: "BahnCard 50", BC100: "BahnCard 100" };
+  const cardLabel = cardLabels[bc.cardType] || bc.cardType;
+
+  // Signature
+  let sigPath = "";
+  if (user.signaturePath && existsSync(user.signaturePath)) {
+    const isCanvas = user.signaturePath.includes("_canvas");
+    if (isCanvas) {
+      sigPath = user.signaturePath;
+    } else {
+      const tmpSig = `/tmp/sig_bc_${randomBytes(4).toString("hex")}.png`;
+      try {
+        execSync(`python3 /app/pdf-generator/process_signature.py "${user.signaturePath}" "${tmpSig}"`, { timeout: 10000 });
+        sigPath = tmpSig;
+      } catch { sigPath = user.signaturePath; }
+    }
+  }
+
+  // Build Reisekostenabrechnung input for BahnCard
+  const rkInput = {
+    profile: {
+      lastName: user.lastName || "",
+      firstName: user.firstName || "",
+      street: user.street || "",
+      zip: user.zipCode || "",
+      city: user.city || "",
+      accountHolder: user.accountHolder || name,
+      bank: user.bank || "",
+      iban: user.ibanEncrypted || "",
+      bic: user.bic || "",
+      signaturePath: sigPath,
+    },
+    trip: {
+      purpose: `${cardLabel} ${bc.class}. Klasse — ${bc.year}${bc.justification ? " — " + bc.justification.substring(0, 60) : ""}`,
+      route: `${cardLabel} (${fmtDate(bc.validFrom)} – ${fmtDate(bc.validTo)})${bc.bahnCardNr ? " Nr. " + bc.bahnCardNr : ""}`,
+      startDate: fmtDate(bc.validFrom || new Date()),
+      startTime: "",
+      endDate: fmtDate(bc.validTo || new Date()),
+      endTime: "",
+      mode: "BAHN",
+      pkwReason: "",
+      licensePlate: "",
+      km: 0,
+    },
+    costs: {
+      travel: fmt(bc.cost),
+      kmMoney: fmt(0),
+      lodging: fmt(0),
+      meals: fmt(0),
+      other: fmt(0),
+      subtotal: fmt(bc.cost),
+      reimbursement: fmt(0),
+      total: fmt(bc.cost),
+    },
+    checkboxes: {
+      bankKnown: true,
+      bahn: true,
+      auto: false,
+      dienstwagen: false,
+      flugzeug: false,
+      schiff: false,
+      co2: false,
+    },
   };
 
   const tmp = `/tmp/bc_${randomBytes(8).toString("hex")}`;
   const inFile = `${tmp}.json`, outFile = `${tmp}.pdf`, mergedFile = `${tmp}_merged.pdf`;
-  writeFileSync(inFile, JSON.stringify(input));
+  writeFileSync(inFile, JSON.stringify(rkInput));
 
   try {
-    execSync(`python3 /app/pdf-generator/generate_bahncard.py ${inFile} ${outFile}`, { timeout: 30000 });
+    execSync(`python3 /app/pdf-generator/generate_reisekosten.py ${inFile} ${outFile}`, { timeout: 30000 });
 
-    // Merge with uploaded Beleg (e.g. BCBP Ersparnis-PDF or BahnCard scan)
+    // Merge with uploaded Beleg (BCBP PDF etc.)
     if (bc.filePath && existsSync(bc.filePath)) {
       try {
-        execSync(`python3 -c "
-from pypdf import PdfWriter, PdfReader
-w = PdfWriter()
-for p in PdfReader('${outFile}').pages: w.add_page(p)
-try:
-    for p in PdfReader('${bc.filePath}').pages: w.add_page(p)
-except: pass
-w.write('${mergedFile}')
-"`, { timeout: 15000 });
+        execSync(`python3 /app/pdf-generator/merge_belege.py ${outFile} /dev/stdin ${mergedFile}`, {
+          input: JSON.stringify([bc.filePath]),
+          timeout: 15000,
+        });
         const pdf = readFileSync(mergedFile);
         cleanup(inFile, outFile, mergedFile);
         return pdfResponse(pdf, `BahnCard_${bc.year}.pdf`);
-      } catch {
-        // If merge fails (e.g. image not PDF), return just the form
-      }
+      } catch {}
     }
 
     const pdf = readFileSync(outFile);
@@ -70,21 +117,16 @@ w.write('${mergedFile}')
     return pdfResponse(pdf, `BahnCard_${bc.year}.pdf`);
   } catch (e: any) {
     cleanup(inFile, outFile, mergedFile);
-    return NextResponse.json({ error: "PDF generation failed: " + e.message }, { status: 500 });
+    return NextResponse.json({ error: "PDF failed: " + e.message }, { status: 500 });
   }
 }
 
-function pdfResponse(data: Buffer | Uint8Array | Uint8Array, filename: string) {
+function pdfResponse(data: Buffer | Uint8Array, filename: string) {
   return new NextResponse(new Uint8Array(data), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-    },
+    headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${filename}"` },
   });
 }
 
 function cleanup(...files: string[]) {
-  for (const f of files) {
-    try { if (existsSync(f)) unlinkSync(f); } catch {}
-  }
+  for (const f of files) { try { if (existsSync(f)) unlinkSync(f); } catch {} }
 }
