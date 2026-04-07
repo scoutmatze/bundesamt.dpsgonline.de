@@ -57,23 +57,38 @@ export default function BahnCardPage() {
 
   if(loading) return <div style={{padding:40,textAlign:"center",color:"#9e9a92"}}>Lade...</div>;
 
+  const bcModels: Record<string,{name:string;price2:number;price1:number;note?:string}> = {
+    BC25: { name:"BahnCard 25", price2:62.90, price1:125.90 },
+    BC50: { name:"BahnCard 50", price2:244, price1:492, note:"Osteraktion bis 31.07.: 199 € (2.Kl.) / 429 € (1.Kl.)" },
+    BC100: { name:"BahnCard 100", price2:4550, price1:7550 },
+    MY_BC25: { name:"My BahnCard 25 (unter 27)", price2:36.90, price1:73.90 },
+    MY_BC50: { name:"My BahnCard 50 (unter 27)", price2:79.90, price1:159.90, note:"Osteraktion bis 31.07.: 49,99 € (2.Kl.)" },
+    JUGEND_BC25: { name:"Jugend BahnCard 25 (6-18)", price2:14.90, price1:14.90 },
+    SENIOR_BC25: { name:"Senioren BahnCard 25 (ab 65)", price2:40.90, price1:81.90 },
+    SENIOR_BC50: { name:"Senioren BahnCard 50 (ab 65)", price2:122, price1:241, note:"Osteraktion bis 31.07.: 99,99 € (2.Kl.)" },
+  };
+  const autoPrice = (type:string, cls:number) => { const m=bcModels[type]; return m ? (cls===1?m.price1:m.price2) : 0; };
+  const onModelChange = (type:string) => { up("cardType",type); up("cost",autoPrice(type, form.class||2)); };
+  const onClassChange = (cls:number) => { up("class",cls); up("cost",autoPrice(form.cardType, cls)); };
+
   const formUI = (
     <div style={{background:"#fff",borderRadius:12,padding:24,border:"1px solid #d4d0c8",marginBottom:16}}>
       <h3 style={{fontSize:16,fontWeight:700,color:"#003056",marginTop:0}}>{editing?"BahnCard bearbeiten":"Neuer BahnCard-Antrag"}</h3>
       <div style={{display:"grid",gap:12}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(100px, 1fr))",gap:10}}>
           <div><label style={S.label}>Jahr</label><input type="number" value={form.year} onChange={e=>up("year",+e.target.value)} style={S.input}/></div>
-          <div><label style={S.label}>Typ</label>
-            <select value={form.cardType} onChange={e=>up("cardType",e.target.value)} style={{...S.input,background:"#fff"}}>
-              <option value="BC25">BahnCard 25</option><option value="BC50">BahnCard 50</option><option value="BC100">BahnCard 100</option>
+          <div><label style={S.label}>BahnCard-Modell</label>
+            <select value={form.cardType} onChange={e=>onModelChange(e.target.value)} style={{...S.input,background:"#fff"}}>
+              {Object.entries(bcModels).map(([k,v])=><option key={k} value={k}>{v.name}</option>)}
             </select>
           </div>
           <div><label style={S.label}>Klasse</label>
-            <select value={form.class} onChange={e=>up("class",+e.target.value)} style={{...S.input,background:"#fff"}}>
+            <select value={form.class} onChange={e=>onClassChange(+e.target.value)} style={{...S.input,background:"#fff"}}>
               <option value={2}>2. Klasse</option><option value={1}>1. Klasse</option>
             </select>
           </div>
         </div>
+        {bcModels[form.cardType]?.note && <div style={{padding:"6px 12px",borderRadius:6,background:"#fef3c7",color:"#92400e",fontSize:12}}>💡 {bcModels[form.cardType].note}</div>}
 
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(100px, 1fr))",gap:10}}>
           <div><label style={S.label}>Kosten €</label><input type="number" step="0.01" value={form.cost||""} onChange={e=>up("cost",parseFloat(e.target.value)||0)} style={S.input}/></div>
@@ -90,9 +105,16 @@ export default function BahnCardPage() {
           <p style={{fontSize:12,color:"#1e40af",margin:"0 0 8px"}}>Berechne deine Ersparnis auf <a href="https://bcbp.db-app.de/bcbpmain" target="_blank" rel="noopener" style={{color:"#1e40af",fontWeight:700}}>bcbp.db-app.de</a> und lade das Ergebnis-PDF hier hoch.</p>
           <p style={{fontSize:12,color:"#1e40af",margin:"0 0 0"}}>BMIS-Nummer: <strong>4000663</strong></p>
         </div>
-        <div style={{marginBottom:12}}>
-          <label style={S.label}>Beleg / Ersparnis-PDF</label>
-          <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:form.fileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6}}>{form.fileName?"📎 "+form.fileName:"📤 Datei hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={async e=>{if(!e.target.files?.[0]||!editing)return;const fd=new FormData();fd.append("file",e.target.files[0]);fd.append("type","bahncard");fd.append("id",editing);const res=await fetch("/api/upload",{method:"POST",body:fd});if(res.ok){const d=await res.json();up("fileName",d.fileName);load()}else alert("Upload fehlgeschlagen")}}/></label>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <div>
+          <label style={S.label}>📊 Preisrechner-PDF (BCBP)</label>
+          <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:form.fileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6}}>{form.fileName?"📎 "+form.fileName:"📤 Preisrechner hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={async e=>{if(!e.target.files?.[0]||!editing)return;const fd=new FormData();fd.append("file",e.target.files[0]);fd.append("type","bahncard");fd.append("id",editing);const res=await fetch("/api/upload",{method:"POST",body:fd});if(res.ok){const d=await res.json();up("fileName",d.fileName);load()}else alert("Upload fehlgeschlagen")}}/></label>
+        </div>
+        <div>
+          <label style={S.label}>🧾 BahnCard-Rechnung</label>
+          <label style={{display:"inline-flex",padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:form.receiptFileName?"#d1fae5":"#fff",color:"#003056",fontSize:13,fontWeight:600,cursor:"pointer",gap:6}}>{form.receiptFileName?"📎 "+form.receiptFileName:"📤 Rechnung hochladen"}<input type="file" accept=".pdf,.jpg,.png" hidden onChange={async e=>{if(!e.target.files?.[0]||!editing)return;const fd=new FormData();fd.append("file",e.target.files[0]);fd.append("type","bahncard-receipt");fd.append("id",editing);const res=await fetch("/api/upload",{method:"POST",body:fd});if(res.ok){const d=await res.json();up("receiptFileName",d.fileName);load()}else alert("Upload fehlgeschlagen")}}/></label>
+        </div>
+        </div>
         </div>
         <div><label style={S.label}>Hinweise</label><textarea value={form.notes||""} onChange={e=>up("notes",e.target.value)} rows={2} placeholder="Optional" style={{...S.input,resize:"vertical",fontFamily:"inherit"}}/></div>
       </div>

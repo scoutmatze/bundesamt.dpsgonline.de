@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
   if (type === "bewirtung") {
     await prisma.$executeRaw`UPDATE "Bewirtung" SET "fileName"=${safe}, "filePath"=${fp} WHERE id=${id} AND "userId"=${userId}`;
   } else if (type === "bahncard") {
+  } else if (type === "bahncard-receipt") {
+    await prisma.$executeRaw`UPDATE "BahnCard" SET "receiptFileName"=${fileName}, "receiptFilePath"=${filePath} WHERE id=${id} AND "userId"=${userId}`;
+
     await prisma.$executeRaw`UPDATE "BahnCard" SET "fileName"=${safe}, "filePath"=${fp} WHERE id=${id} AND "userId"=${userId}`;
   } else if (type === "receipt") {
     // Just save file, return path (receipt creation handles the rest)

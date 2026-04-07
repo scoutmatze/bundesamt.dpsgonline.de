@@ -100,10 +100,13 @@ export async function GET(req: NextRequest) {
     execSync(`python3 /app/pdf-generator/generate_reisekosten.py ${inFile} ${outFile}`, { timeout: 30000 });
 
     // Merge with uploaded Beleg (BCBP PDF etc.)
-    if (bc.filePath && existsSync(bc.filePath)) {
+    const belegs: string[] = [];
+    if (bc.filePath && existsSync(bc.filePath)) belegs.push(bc.filePath);
+    if (bc.receiptFilePath && existsSync(bc.receiptFilePath)) belegs.push(bc.receiptFilePath);
+    if (belegs.length > 0) {
       try {
         execSync(`python3 /app/pdf-generator/merge_belege.py ${outFile} /dev/stdin ${mergedFile}`, {
-          input: JSON.stringify([bc.filePath]),
+          input: JSON.stringify(belegs),
           timeout: 15000,
         });
         const pdf = readFileSync(mergedFile);
