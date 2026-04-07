@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const rid = "c" + randomBytes(12).toString("hex");
     await prisma.$executeRaw`
       INSERT INTO "Receipt" (id, "tripId", description, amount, date, category, "fileName", "filePath", "mimeType", "fileSize", "createdAt")
-      VALUES (${rid}, ${targetId}, ${item.subject || item.fileName}, ${item.amount || 0}, NOW(), 'NEBENKOSTEN', ${item.fileName}, ${item.filePath}, ${item.mimeType}, ${item.fileSize}, NOW())
+      VALUES (${rid}, ${targetId}, ${item.subject || item.fileName}, ${item.amount || 0}, NOW(), 'FAHRT', ${item.fileName}, ${item.filePath}, ${item.mimeType}, ${item.fileSize}, NOW())
     `;
   } else if (targetType === "sachkosten") {
     const sid = "si" + randomBytes(12).toString("hex");

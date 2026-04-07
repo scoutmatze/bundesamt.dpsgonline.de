@@ -33,8 +33,10 @@ export async function GET(req: NextRequest) {
   try {
     let sigPath: string | null = null;
     if (user.signaturePath && existsSync(user.signaturePath)) {
+      const isCanvas = user.signaturePath.includes("_canvas");
+      if (isCanvas) { sigPath = user.signaturePath; } else {
       sigPath = `/tmp/sig_${tmpId}.png`;
-      try { execSync(`python3 ${genPath}/process_signature.py "${user.signaturePath}" "${sigPath}"`, { timeout: 10000 }); tmpFiles.push(sigPath); } catch { sigPath = user.signaturePath; }
+      try { execSync(`python3 ${genPath}/process_signature.py "${user.signaturePath}" "${sigPath}"`, { timeout: 10000 }); tmpFiles.push(sigPath); } catch { sigPath = user.signaturePath; } }
     }
     const rkInput = { profile: { lastName: user.lastName||"", firstName: user.firstName||"", street: user.street||"", zip: user.zipCode||"", city: user.city||"", accountHolder: user.accountHolder||`${user.firstName||""} ${user.lastName||""}`.trim(), bank: user.bank||"", iban: user.ibanEncrypted||"", bic: user.bic||"", signaturePath: sigPath }, trip: { purpose: trip.purpose, route: trip.route||"", startDate: fmtDate(trip.startDate), startTime: trip.startTime||"", endDate: fmtDate(trip.endDate||trip.startDate), endTime: trip.endTime||"", mode: trip.travelMode, pkwReason: trip.pkwReason||"", licensePlate: trip.licensePlate||"", km: trip.travelMode==="PRIVAT_PKW"?Math.round(byC("FAHRT")/0.20):0 }, costs: { travel: fmt(byC("FAHRT")), kmMoney: fmt(trip.travelMode==="PRIVAT_PKW"?byC("FAHRT"):0), lodging: fmt(byC("UNTERKUNFT")), meals: fmt(byC("VERPFLEGUNG")), other: fmt(byC("NEBENKOSTEN")), subtotal: fmt(total), reimbursement: fmt(0), total: fmt(total) }, checkboxes: { bankKnown: true, bahn: trip.travelMode==="BAHN", auto: trip.travelMode==="PRIVAT_PKW", dienstwagen: trip.travelMode==="DIENSTWAGEN", flugzeug: trip.travelMode==="FLUGZEUG", schiff: false, co2: trip.co2Offset||false } };
     const rkIn=`/tmp/rk_in_${tmpId}.json`,rkOut=`/tmp/rk_out_${tmpId}.pdf`;
