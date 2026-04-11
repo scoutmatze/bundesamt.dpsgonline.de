@@ -27,10 +27,12 @@ export async function GET(req: NextRequest) {
   const items: any[] = await prisma.$queryRaw`SELECT * FROM "SachkostenItem" WHERE "sachkostenId"=${id} ORDER BY date`;
 
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+  let iban = "";
+  try { const { decrypt } = await import("@/lib/encryption"); iban = user.ibanEncrypted ? decrypt(user.ibanEncrypted) : ""; } catch {}
   const input = {
     name,
     address: [user.street, `${user.zipCode || ""} ${user.city || ""}`].filter(Boolean).join(", "),
-    iban: (() => { try { const { decrypt } = require("@/lib/encryption"); return user.ibanEncrypted ? decrypt(user.ibanEncrypted) : ""; } catch { return ""; } })(), bic: user.bic || "", bank: user.bank || "", gremium: user.gremium || "",
+    iban, bic: user.bic || "", bank: user.bank || "", gremium: user.gremium || "",
     year: sk.year, quarter: sk.quarter,
     items: items.map(i => ({ date: new Date(i.date).toLocaleDateString("de-DE"), description: i.description, amount: i.amount })),
     notes: sk.notes || "",

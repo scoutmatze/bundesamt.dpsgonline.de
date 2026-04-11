@@ -38,6 +38,7 @@ export async function PUT(req: NextRequest) {
       zipCode: data.zipCode,
       city: data.city,
       bank: data.bank,
+      title: data.title,
       gremium: data.gremium,
       bic: data.bic,
       ibanEncrypted: data.iban ? (await import('@/lib/encryption')).encrypt(data.iban) : undefined,

@@ -52,6 +52,7 @@ model User {
   role          String    @default("USER")
   emailVerified DateTime?
   name          String?
+  title         String?
   firstName     String?
   lastName      String?
   street        String?
