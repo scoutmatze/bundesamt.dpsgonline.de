@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
   const items: any[] = await prisma.$queryRaw`SELECT * FROM "SachkostenItem" WHERE "sachkostenId"=${id} ORDER BY date`;
 
   const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
-  let iban = "";
-  try { const { decrypt } = await import("@/lib/encryption"); iban = user.ibanEncrypted ? decrypt(user.ibanEncrypted) : ""; } catch {}
+  let iban = user.ibanEncrypted || "";
+  try { const { decrypt } = await import("@/lib/encryption"); iban = decrypt(iban); } catch {}
   const input = {
     name,
     address: [user.street, `${user.zipCode || ""} ${user.city || ""}`].filter(Boolean).join(", "),
