@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
   const skInput = {
     name,
     address: `${user.street || ""}, ${user.zipCode || ""} ${user.city || ""}`.trim().replace(/^,\s*/, ""),
-    iban: user.ibanEncrypted || "",
+    iban: await (async()=>{try{const{decrypt}=await import("@/lib/encryption");return user.ibanEncrypted?decrypt(user.ibanEncrypted):""}catch{return""}})(),
     bic: user.bic || "",
     bank: user.bank || "",
     account_holder: user.accountHolder || name,

@@ -51,7 +51,7 @@ export default function ProfilPage() {
 
   useEffect(() => {
     fetch("/api/profile").then(r=>r.json()).then(d => {
-      setP({ firstName:d.firstName||"", lastName:d.lastName||"", street:d.street||"", zipCode:d.zipCode||"", city:d.city||"", iban:d.ibanEncrypted||"", bic:d.bic||"", bank:d.bank||"", accountHolder:d.accountHolder||"", gremium:d.gremium||"" });
+      setP({ firstName:d.firstName||"", lastName:d.lastName||"", street:d.street||"", zipCode:d.zipCode||"", city:d.city||"", iban:d.ibanDecrypted||"", bic:d.bic||"", bank:d.bank||"", accountHolder:d.accountHolder||"", gremium:d.gremium||"" });
       if (d.signaturePath) setSigUrl("/api/signature?t=" + Date.now());
     });
   }, []);

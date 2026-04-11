@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   const input = {
     name,
     address: [user.street, `${user.zipCode || ""} ${user.city || ""}`].filter(Boolean).join(", "),
-    iban: "", bic: user.bic || "", bank: user.bank || "", gremium: user.gremium || "",
+    iban: (() => { try { const { decrypt } = require("@/lib/encryption"); return user.ibanEncrypted ? decrypt(user.ibanEncrypted) : ""; } catch { return ""; } })(), bic: user.bic || "", bank: user.bank || "", gremium: user.gremium || "",
     year: sk.year, quarter: sk.quarter,
     items: items.map(i => ({ date: new Date(i.date).toLocaleDateString("de-DE"), description: i.description, amount: i.amount })),
     notes: sk.notes || "",

@@ -17,7 +17,11 @@ async function getUserFromSession() {
 export async function GET() {
   const user = await getUserFromSession();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json(user);
+  let ibanDecrypted = "";
+  if (user.ibanEncrypted) {
+    try { const { decrypt } = await import("@/lib/encryption"); ibanDecrypted = decrypt(user.ibanEncrypted); } catch { ibanDecrypted = ""; }
+  }
+  return NextResponse.json({ ...user, ibanDecrypted });
 }
 
 export async function PUT(req: NextRequest) {
