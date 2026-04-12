@@ -38,7 +38,8 @@ export default function ReisenPage() {
         </div>
       ) : (
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {trips.map((t: any) => {
+          {trips.filter((t:any)=>t.status!=="SUBMITTED").length>0 && <div style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginBottom:-4}}>Offen</div>}
+          {trips.filter((t:any)=>t.status!=="SUBMITTED").map((t: any) => {
             const total = (t.receipts||[]).reduce((s:number,r:any) => s + r.amount, 0);
             const pending = (t.receipts||[]).filter((r:any)=>r.amount===0).length;
             const isEmailTrip = t.purpose?.startsWith("Beleg:");
@@ -61,6 +62,26 @@ export default function ReisenPage() {
               </Link>
             );
           })}
+        {trips.filter((t:any)=>t.status==="SUBMITTED").length>0 && <>
+            <div style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6,marginTop:20,marginBottom:-4}}>Eingereicht</div>
+            {trips.filter((t:any)=>t.status==="SUBMITTED").map((t: any) => {
+            const total = (t.receipts||[]).reduce((s:number,r:any) => s + r.amount, 0);
+            return (
+              <Link key={t.id} href={`/reisen/${t.id}`} style={{ background:"#f5f3ef", borderRadius:12, padding:"16px 20px", border:"1px solid #d4d0c8", display:"flex", alignItems:"center", gap:16, textDecoration:"none", color:"inherit", opacity:0.7 }}>
+                <div style={{ width:40, height:40, borderRadius:8, background:"#d1fae5", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>✓</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:700, fontSize:15, color:"#1a1815", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", display:"flex", alignItems:"center", gap:6 }}>
+                    {t.purpose}
+                    <span style={{padding:"2px 8px",borderRadius:12,background:"#d1fae5",color:"#065f46",fontSize:11,fontWeight:700}}>✓ Eingereicht</span>
+                  </div>
+                  <div style={{ fontSize:12, color:"#9e9a92", marginTop:3 }}>{new Date(t.startDate).toLocaleDateString("de-DE")} · {t.route||"Kein Reiseweg"}</div>
+                </div>
+                <div style={{ textAlign:"right", flexShrink:0 }}>
+                  <div style={{ fontWeight:700, fontSize:16, color:"#065f46" }}>{total.toFixed(2).replace(".",",")} €</div>
+                </div>
+              </Link>
+            );
+          })}</>}
         </div>
       )}
     </div>

@@ -104,7 +104,6 @@ model Trip {
   pkwReason    String?
   licensePlate String?
   mietwagenApproved Boolean? @default(false)
-  status        String?  @default("DRAFT")
   co2Offset    Boolean    @default(false)
 
   status       TripStatus @default(DRAFT)
