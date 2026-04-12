@@ -184,6 +184,10 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         ))}
         <button onClick={()=>{setKmLegs([...kmLegs,{from:"",to:"",km:0}])}} style={{padding:"6px 14px",borderRadius:6,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Strecke hinzufügen</button>
         <p style={{fontSize:11,color:"#9e9a92",marginTop:8,marginBottom:0}}>📍 = Entfernung per OpenStreetMap berechnen (DSGVO-konform). Alternativ manuell eingeben.</p>
+        <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#5c5850",cursor:"pointer",marginTop:8}}>
+          <input type="checkbox" checked={trip.isElectric||false} onChange={e=>fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,isElectric:e.target.checked})}).then(()=>load())} style={{width:18,height:18,accentColor:"#2D6A4F"}}/>
+          ⚡ E-Auto / Elektrofahrzeug (CO₂: 60 g/km statt 154 g/km)
+        </label>
       </div>)}
 
       {trip.startTime && trip.endTime && (
@@ -209,7 +213,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <label style={{fontSize:12,fontWeight:600,color:"#5c5850",textTransform:"uppercase",letterSpacing:0.6}}>🌱 CO₂-Fußabdruck</label>
           <span style={{fontWeight:700,fontSize:16,color:trip.travelMode==="BAHN"?"#2D6A4F":"#b45309"}}>{(()=>{
-            const factors:any={BAHN:32,PRIVAT_PKW:154,MIETWAGEN:154,DIENSTWAGEN:154,FLUGZEUG:214};
+            const factors:any={BAHN:32,PRIVAT_PKW:trip.isElectric?60:154,MIETWAGEN:trip.isElectric?60:154,DIENSTWAGEN:trip.isElectric?60:154,FLUGZEUG:214};
             const f=factors[trip.travelMode]||0;
             let km=0;
             if(trip.kmLegs){try{km=JSON.parse(trip.kmLegs).reduce((s:number,l:any)=>s+l.km,0)}catch{}}
@@ -219,7 +223,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
           })()}</span>
         </div>
         <div style={{fontSize:11,color:"#9e9a92",marginTop:6}}>
-          {trip.travelMode==="BAHN"?"🚂 Bahn: 32 g/km — umweltfreundlichste Wahl":"🚗 PKW: 154 g/km"}
+          {trip.travelMode==="BAHN"?"🚂 Bahn: 32 g/km — umweltfreundlichste Wahl":trip.isElectric?"⚡ E-Auto: 60 g/km":"🚗 PKW: 154 g/km"}
           {trip.travelMode==="BAHN"?" · Bis zu 80% weniger CO₂ als PKW":""}
         </div>
       </div>

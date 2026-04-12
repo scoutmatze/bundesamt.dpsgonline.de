@@ -72,6 +72,7 @@ export async function PUT(req: NextRequest) {
       endDate: data.endDate ? new Date(data.endDate) : trip.endDate,
       startTime: data.startTime ?? trip.startTime,
       status: data.status ?? trip.status,
+      isElectric: data.isElectric ?? trip.isElectric,
       endTime: data.endTime ?? trip.endTime,
     },
   });
