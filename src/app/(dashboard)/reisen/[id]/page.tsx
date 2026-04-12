@@ -146,7 +146,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={delTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Löschen</button>
-          <button onClick={downloadPdf} disabled={!receipts.length||hasIncomplete} style={{padding:"8px 16px",borderRadius:8,border:"none",background:hasIncomplete?"#d4d0c8":"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:hasIncomplete?"not-allowed":"pointer"}}>📄 PDF-Paket erstellen</button>
+          <button onClick={downloadPdf} disabled={!receipts.length&&!trip.kmAmount&&trip.travelMode==="BAHN"||hasIncomplete} style={{padding:"8px 16px",borderRadius:8,border:"none",background:hasIncomplete?"#d4d0c8":"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:hasIncomplete?"not-allowed":"pointer"}}>📄 PDF-Paket erstellen</button>
           {!isSubmitted ? <button onClick={submitTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #2D6A4F",background:"#d1fae5",color:"#065f46",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Als eingereicht markieren</button> : <button onClick={reopenTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#7a756c",fontSize:13,cursor:"pointer"}}>↩ Wieder öffnen</button>}
         </div>
       </div>
