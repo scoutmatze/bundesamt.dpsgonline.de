@@ -10,7 +10,7 @@ const S = {
 interface Participant { name:string; role:string; }
 interface BW { id:string; date:string; location:string; occasion:string; participants:string; amountFood:number; amountDrinks:number; amountTip:number; amountTotal:number; notes:string; fileName?:string; filePath?:string; isHost?:boolean; hostName?:string; }
 
-const empty = ():Partial<BW>&{participantList:Participant[]} => ({date:"",location:"",occasion:"",amountFood:0,amountDrinks:0,amountTip:0,notes:"",participantList:[{name:"",role:""}]});
+const empty = ():Partial<BW>&{participantList:Participant[]} => ({date:"",location:"",occasion:"",amountFood:0,amountDrinks:0,amountTip:0,notes:"",isHost:true,hostName:"",participantList:[{name:"",role:""}]});
 
 export default function BewirtungPage() {
   const [list, setList] = useState<BW[]>([]);
@@ -46,7 +46,8 @@ export default function BewirtungPage() {
   const save = async () => {
     const body = { ...form, participants: form.participantList.filter((p:Participant)=>p.name), id: editing || undefined };
     const method = editing ? "PUT" : "POST";
-    await fetch("/api/bewirtung",{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const res = await fetch("/api/bewirtung",{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!res.ok){const err=await res.json().catch(()=>({}));alert("Fehler beim Speichern: "+(err.error||res.statusText));return}
     setEditing(null); setAdding(false); setForm(empty()); load();
   };
 
