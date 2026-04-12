@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   if (!tripId) return NextResponse.json({ error: "tripId required" }, { status: 400 });
   const trip = await prisma.trip.findFirst({ where: { id: tripId, userId: user.id }, include: { receipts: { orderBy: { date: "asc" } } } });
   if (!trip) return NextResponse.json({ error: "Trip not found" }, { status: 404 });
-  if (!trip.receipts.length) return NextResponse.json({ error: "Keine Belege vorhanden" }, { status: 400 });
+  if (!trip.receipts.length && !trip.kmAmount) return NextResponse.json({ error: "Keine Belege vorhanden" }, { status: 400 });
   const receipts = trip.receipts;
   const byC = (c: string) => receipts.filter(r => r.category === c).reduce((s, r) => s + r.amount, 0);
   const total = receipts.reduce((s, r) => s + r.amount, 0);
