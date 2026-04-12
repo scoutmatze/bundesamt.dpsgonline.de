@@ -68,6 +68,8 @@ async function pollEmails() {
           const safe=att.filename.replace(/[^a-zA-Z0-9._-]/g,"_");
           const dup=await pool.query('SELECT id FROM "Receipt" WHERE "tripId" IN (SELECT id FROM "Trip" WHERE "userId"=$1) AND "fileName"=$2',[u.id,safe]);
           if(dup.rows.length>0){console.log("  Skip dup: "+safe);continue}
+          const dupInbox=await pool.query('SELECT id FROM "InboxItem" WHERE "userId"=$1 AND "fileName"=$2',[u.id,safe]);
+          if(dupInbox.rows.length>0){console.log("  Skip dup inbox: "+safe);continue}
           const fp=path.join(dir,Date.now()+"_"+safe); writeFileSync(fp,att.content);
 
           let amt=0,fromS=null,toS=null,ht=false,dt=parsed.date||new Date(),orderNr=null;
