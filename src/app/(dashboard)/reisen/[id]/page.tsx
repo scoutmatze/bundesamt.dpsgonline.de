@@ -112,7 +112,8 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   ) : null;
   const receipts=trip.receipts||[];
   const byC=(c:string)=>receipts.filter((r:any)=>r.category===c).reduce((s:number,r:any)=>s+r.amount,0);
-  const total=receipts.reduce((s:number,r:any)=>s+r.amount,0);
+  const receiptTotal=receipts.reduce((s:number,r:any)=>s+r.amount,0);
+  const total=trip.travelMode==="PRIVAT_PKW"?(trip.kmAmount||0)+receiptTotal:receiptTotal;
   const hasIncomplete=receipts.some((r:any)=>r.amount===0&&!(r.fileName||'').includes('Kaufbeleg')&&!(r.fileName||'').includes('Reservierung')&&!(r.fileName||'').includes('Kaufbeleg')&&!(r.fileName||'').includes('Reservierung')&&r.category!=="NACHWEIS");
   const otherTrips=allTrips.filter((t:any)=>t.id!==id);
 
@@ -140,7 +141,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
       {hasIncomplete && <div style={{padding:"10px 16px",borderRadius:8,background:"#fef3c7",color:"#92400e",fontSize:13,fontWeight:600,marginBottom:16,border:"1px solid #fde68a"}}>⚠️ {receipts.filter((r:any)=>r.amount===0&&!(r.fileName||'').includes('Kaufbeleg')&&!(r.fileName||'').includes('Reservierung')&&!(r.fileName||'').includes('Kaufbeleg')&&!(r.fileName||'').includes('Reservierung')&&r.category!=="NACHWEIS").length} Beleg(e) ohne Betrag</div>}
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(120px, 1fr))",gap:10,marginBottom:20}}>
-        {[{l:"Fahrt",v:byC("FAHRT")},{l:"Unterkunft",v:byC("UNTERKUNFT")},{l:"Verpflegung",v:byC("VERPFLEGUNG")},{l:"Nebenkosten",v:byC("NEBENKOSTEN")},{l:"Gesamt",v:total,a:true}].map((c,i)=>(
+        {[{l:"Fahrt",v:trip.travelMode==="PRIVAT_PKW"?(trip.kmAmount||0):byC("FAHRT")},{l:"Unterkunft",v:byC("UNTERKUNFT")},{l:"Verpflegung",v:byC("VERPFLEGUNG")},{l:"Nebenkosten",v:byC("NEBENKOSTEN")},{l:"Gesamt",v:total,a:true}].map((c,i)=>(
           <div key={i} style={{background:c.a?"#003056":"#fff",borderRadius:10,padding:"12px 14px",border:c.a?"none":"1px solid #d4d0c8",color:c.a?"#fff":"#1a1815"}}>
             <div style={{fontSize:11,textTransform:"uppercase",letterSpacing:0.6,fontWeight:600,opacity:0.6,marginBottom:4}}>{c.l}</div>
             <div style={{fontSize:18,fontWeight:700}}>{fmt(c.v)}</div>
