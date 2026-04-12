@@ -74,6 +74,16 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
     const res = await fetch(`/api/preview?path=${encodeURIComponent(filePath)}`);
     if(res.ok) setPreviewData(await res.json());
   };
+  const submitTrip = async () => {
+    if(!confirm("Reise als eingereicht markieren? Sie wird danach nicht mehr bearbeitbar.")) return;
+    await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"SUBMITTED"})});
+    load();
+  };
+  const reopenTrip = async () => {
+    await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:"DRAFT"})});
+    load();
+  };
+  const isSubmitted = trip?.status === "SUBMITTED";
   const lookupKm = async (idx:number) => {
     const leg=kmLegs[idx]; if(!leg.from||!leg.to)return;
     setKmLoading(idx);
@@ -120,6 +130,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   return (
     <div>
       {previewModal}
+      {isSubmitted && <div style={{padding:"12px 20px",borderRadius:10,background:"#d1fae5",color:"#065f46",fontSize:14,fontWeight:700,marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>✓ Diese Reise wurde als eingereicht markiert<button onClick={reopenTrip} style={{padding:"4px 12px",borderRadius:6,border:"1px solid #065f46",background:"transparent",color:"#065f46",fontSize:12,cursor:"pointer"}}>↩ Wieder öffnen</button></div>}
       <button onClick={()=>router.push("/reisen")} style={{border:"none",background:"none",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer",padding:0}}>← Zurück</button>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginTop:8,marginBottom:20,gap:12,flexWrap:"wrap"}}>
         <div>
@@ -135,6 +146,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
         <div style={{display:"flex",gap:8}}>
           <button onClick={delTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#5c5850",fontSize:13,cursor:"pointer"}}>Löschen</button>
           <button onClick={downloadPdf} disabled={!receipts.length||hasIncomplete} style={{padding:"8px 16px",borderRadius:8,border:"none",background:hasIncomplete?"#d4d0c8":"#003056",color:"#fff",fontSize:13,fontWeight:700,cursor:hasIncomplete?"not-allowed":"pointer"}}>📄 PDF-Paket erstellen</button>
+          {!isSubmitted ? <button onClick={submitTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #2D6A4F",background:"#d1fae5",color:"#065f46",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Als eingereicht markieren</button> : <button onClick={reopenTrip} style={{padding:"8px 16px",borderRadius:8,border:"1px solid #d4d0c8",background:"#fff",color:"#7a756c",fontSize:13,cursor:"pointer"}}>↩ Wieder öffnen</button>}
         </div>
       </div>
 
@@ -305,7 +317,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
         ) : (
-          <button onClick={()=>setAdding(true)} style={{marginTop:12,padding:"8px 18px",borderRadius:8,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Beleg hinzufügen</button>
+          <button onClick={()=>setAdding(true)} disabled={isSubmitted} style={{marginTop:12,padding:"8px 18px",borderRadius:8,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Beleg hinzufügen</button>
         )}
       </div>
     </div>

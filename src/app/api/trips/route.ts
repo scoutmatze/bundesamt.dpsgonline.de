@@ -71,6 +71,7 @@ export async function PUT(req: NextRequest) {
       startDate: data.startDate ? new Date(data.startDate) : trip.startDate,
       endDate: data.endDate ? new Date(data.endDate) : trip.endDate,
       startTime: data.startTime ?? trip.startTime,
+      status: data.status ?? trip.status,
       endTime: data.endTime ?? trip.endTime,
     },
   });
