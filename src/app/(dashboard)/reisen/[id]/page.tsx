@@ -69,6 +69,7 @@ export default function TripDetail({ params }: { params: Promise<{ id: string }>
   const saveKm = async (legs:{from:string;to:string;km:number}[]) => {
     const totalKm=legs.reduce((s,l)=>s+l.km,0);
     await fetch("/api/trips",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,kmLegs:JSON.stringify(legs),kmTotal:totalKm,kmAmount:totalKm*0.20})});
+    load();
   };
   const showPreview = async (filePath:string) => {
     const res = await fetch(`/api/preview?path=${encodeURIComponent(filePath)}`);
