@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetch("/api/sync",{method:"POST"}).catch(()=>{});
     Promise.all([
       fetch("/api/trips").then(r => r.json()),
       fetch("/api/sachkosten").then(r => r.json()).catch(() => []),

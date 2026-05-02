@@ -120,6 +120,7 @@ export default function SachkostenPage() {
           ))}
 
           <button onClick={addItem} style={{marginBottom:12,padding:"6px 14px",borderRadius:6,border:"1px solid #00305640",background:"transparent",color:"#003056",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Position hinzufügen</button>
+          <p style={{fontSize:11,color:"#9e9a92",margin:"0 0 8px"}}>💡 Positionen erst speichern, dann Belege hochladen</p>
 
           <div style={{fontSize:15,fontWeight:700,color:"#003056",textAlign:"right",marginBottom:12}}>Gesamt: {fmt(total(items))}</div>
 
